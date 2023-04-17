@@ -1,0 +1,15 @@
+
+post { username, password } /login -> { id, token }
+post { username, password } /regster -> { id, token }
+post { token } /auth -> { id, token }
+
+
+
+# post { token } /invalidate -> {  }
+# post { id } /delete -> {  }
+
+
+
+
+
+

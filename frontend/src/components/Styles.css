@@ -1,0 +1,70 @@
+html,
+body {
+    overflow: hidden;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+}
+
+.header {
+    background-color: black;
+}
+
+.header-logo {
+    height: 28px;
+    font-size: 18px;
+    color: white;
+    text-align: center;
+    padding-top: 8px;
+}
+
+.middle {
+    top: 36px;
+    bottom: 0px;
+    margin: 0 auto;
+    position: absolute;
+    width: 100%
+}
+
+.middle-offset {
+    position: relative;
+    height: 100%;
+}
+
+.chat-header {
+    background: #5a79bd;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 68%;
+    height: 20px;
+    text-align: center;
+    padding: 8px 0;
+}
+
+.input-field {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 68%;
+    height: 36px;
+    text-align: center;
+}
+
+.current-chat {
+    overflow-y: scroll;
+    background: #a8b8db;
+    position: absolute;
+    right: 0;
+    top: 36px;
+    width: 68%;
+    bottom: 36px;
+}
+
+.chats-list {
+    overflow-y: scroll;
+    width: 32%;
+    height: 100%;
+}
