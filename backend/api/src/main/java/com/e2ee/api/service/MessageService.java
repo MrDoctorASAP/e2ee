@@ -1,5 +1,6 @@
 package com.e2ee.api.service;
 
+import com.e2ee.api.controller.dto.FlatLastMessage;
 import com.e2ee.api.controller.dto.MessageDto;
 import com.e2ee.api.repository.MessageRepository;
 import com.e2ee.api.repository.entities.Message;
@@ -19,9 +20,10 @@ import java.util.List;
 @AllArgsConstructor
 public class MessageService {
 
-    private MemberService memberService;
+    private UserService userService;
     private ChatService chatService;
-    private UnseenMessagesService unseenService;
+    private UnseenMessageService unseenService;
+    private MessagingService messagingService;
 
     private MessageRepository messageRepository;
 
@@ -29,20 +31,27 @@ public class MessageService {
     public Message sendMessage(User user, MessageDto messageDto) {
         Long userId = user.getId();
         Long chatId = messageDto.getChatId();
-        memberService.checkIsChatMember(userId, chatId);
-        chatService.checkChatExists(chatId);
+        userService.checkUserExists(user);
+        chatService.checkChatExistsById(chatId);
+        chatService.checkIsChatMember(userId, chatId);
         Message message = messageRepository.save(messageDto.toEntity(userId));
-        unseenService.publish(message);
-        log.info("Message sent by user {} to chat {}", userId, chatId);
+        unseenService.publish(user, message);
+        messagingService.publish(message);
+        log.info("Message sent: {}", message);
         return message;
     }
 
     public List<Message> getMessages(User user, Long chatId, int page, int count) {
         Long userId = user.getId();
-        memberService.checkIsChatMember(userId, chatId);
-        chatService.checkChatExists(chatId);
+        userService.checkUserExists(user);
+        chatService.checkChatExistsById(chatId);
+        chatService.checkIsChatMember(userId, chatId);
         Pageable pageable = PageRequest.of(page, count, Sort.by("date"));
         return messageRepository.findAllByChatId(chatId, pageable);
+    }
+
+    public List<FlatLastMessage> getLastMessages(User user, int page, int count) {
+        return messageRepository.findLastMessagesByUserId(user.getId());
     }
 
 }

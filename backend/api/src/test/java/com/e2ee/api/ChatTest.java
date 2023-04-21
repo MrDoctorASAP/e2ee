@@ -14,13 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -34,12 +37,12 @@ public class ChatTest {
     @Test
     @SneakyThrows
     void messagingTest() {
-
         UserCredentialsDto user1 = new UserCredentialsDto("username1", "password1");
         String token1s = mvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(user1)))
                 .andDo(print())
+                .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -60,7 +63,7 @@ public class ChatTest {
         // Create chat
         GroupChatDto chatToCreate = new GroupChatDto("123",
                 List.of(token1.getUserId(), token2.getUserId()));
-        String chatStr = mvc.perform(post("/api/v1/chat/create")
+        String chatStr = mvc.perform(post("/api/v1/chat/with")
                         .header("Authorization", "Bearer " + token1.getToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(chatToCreate)))

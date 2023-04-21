@@ -17,8 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -38,16 +38,16 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User createUser(UserRegistrationDto details) throws UserAlreadyExistsException {
-        if (userRepository.findByUsername(details.getCredentials().getUsername()).isPresent()) {
-            throw new UserAlreadyExistsException();
+        String username = details.getCredentials().getUsername();
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new UserAlreadyExistsException(username);
         }
-        User user = User.builder()
-                .username(details.getCredentials().getUsername())
+        User user = userRepository.save(User.builder()
+                .username(username)
                 .password(encoder.encode(details.getCredentials().getPassword()))
-                .build();
-        User save = userRepository.save(user);
+                .build());
         UserProfile userProfile = UserProfile.builder()
-                .user(save)
+                .user(user)
                 .email(details.getEmail())
                 .firstName(details.getFirstName())
                 .lastName(details.getLastName())
@@ -55,17 +55,10 @@ public class UserService implements UserDetailsService {
                 .build();
         profileRepository.save(userProfile);
         log.info("Created user: {}", userProfile);
-        return save;
+        return user;
     }
 
-    @Deprecated
-    @Transactional
-    public User createUserIfAbsent(UserCredentialsDto credentials) {
-        Optional<User> userOptional = userRepository.findByUsername(credentials.getUsername());
-        return userOptional.orElseGet(() -> createUser(new UserRegistrationDto(credentials, "Foo", "Bar", "Buzz")));
-    }
-
-    public boolean existsByIds(Iterable<Long> userIds) {
+    public boolean existsByIds(Collection<Long> userIds) {
         return userRepository.existsAllByIdIn(userIds);
     }
 
@@ -73,9 +66,14 @@ public class UserService implements UserDetailsService {
         checkExistsByIds(List.of(userId));
     }
 
-    public void checkExistsByIds(List<Long> userIds) {
+    public void checkExistsByIds(Collection<Long> userIds) {
         if (!existsByIds(userIds)) {
             throw new UserException("User not found");
         }
     }
+
+    public void checkUserExists(User user) {
+        checkExistsById(user.getId());
+    }
+
 }

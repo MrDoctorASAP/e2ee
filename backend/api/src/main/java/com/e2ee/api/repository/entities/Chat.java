@@ -1,6 +1,5 @@
 package com.e2ee.api.repository.entities;
 
-import com.e2ee.api.controller.dto.GroupChatDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,7 @@ public class Chat {
     private boolean personal;
 
     @OneToOne
-    @JoinColumn(name = "id", referencedColumnName = "chat_id")
+    @JoinColumn(name = "chat_id")
     private GroupChatInfo groupChatInfo;
 
     public static Chat createPersonalChat() {

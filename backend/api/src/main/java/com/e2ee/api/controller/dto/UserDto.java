@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.function.Function;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,5 +24,9 @@ public class UserDto {
                 userProfile.getFirstName(),
                 userProfile.getLastName()
         );
+    }
+
+    public static Function<UserProfile, UserDto> mapping() {
+        return UserDto::fromEntity;
     }
 }

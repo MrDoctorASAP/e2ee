@@ -1,5 +1,6 @@
 package com.e2ee.api.controller.dto;
 
+import com.e2ee.api.repository.entities.Chat;
 import com.e2ee.api.repository.entities.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,10 @@ public class MessageDto {
                 .userId(userId)
                 .date(System.currentTimeMillis())
                 .build();
+    }
+
+    public static MessageDto create(Chat chat, String message) {
+        return new MessageDto(chat.getId(), message);
     }
 
 }

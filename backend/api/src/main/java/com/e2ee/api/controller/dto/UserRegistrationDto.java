@@ -12,4 +12,10 @@ public class UserRegistrationDto {
     private String firstName;
     private String lastName;
     private String email;
+
+    public static UserRegistrationDto create(String username, String password) {
+        return new UserRegistrationDto(new UserCredentialsDto(username, password),
+                username, username, username + "@gmail.com");
+    }
+
 }

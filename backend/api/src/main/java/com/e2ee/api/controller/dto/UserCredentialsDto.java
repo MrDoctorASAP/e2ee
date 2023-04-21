@@ -14,6 +14,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 public class UserCredentialsDto {
 
+
     @NotNull
     @NotBlank(message = "username required")
     @Size(min = 3, max = 255)

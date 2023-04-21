@@ -1,7 +1,8 @@
 package com.e2ee.api.controller;
 
-import com.e2ee.api.controller.dto.UnseenChatDto;
+import com.e2ee.api.controller.dto.FlatUnseenChat;
 import com.e2ee.api.controller.dto.UserDto;
+import com.e2ee.api.repository.batch.FlatBatchChat;
 import com.e2ee.api.repository.entities.Chat;
 import com.e2ee.api.repository.entities.GroupChatInfo;
 import com.e2ee.api.repository.entities.Message;
@@ -12,6 +13,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +38,7 @@ public class BatchController {
     }
 
     @GetMapping("/chats")
-    public List<BatchChat> getChats() {
+    public List<FlatBatchChat> getChats() {
         User user = authService.getAuthenticatedUser();
         return batchService.getChats(user);
     }
@@ -55,7 +58,7 @@ public class BatchController {
         private Chat chat;
         private GroupChatInfo group;
         private UserDto personal;
-        private UnseenChatDto unseen;
+        private FlatUnseenChat unseen;
         private UserDto sender;
         private Message lastMessage;
     }

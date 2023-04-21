@@ -6,8 +6,14 @@ import LoginPage from './components/LoginPage';
 import { useEffect, useState, useRef } from "react";
 import TestComp from './components/ChatContext';
 import { getMessages } from './components/api';
+import SockJsClient from 'react-stomp';
 
 function App() {
+  
+  return <>
+    <SockJsClient url='http://localhost:8080/ws' topics={['/topic/message']}
+          onMessage={(msg) => { console.log(msg); }} debug={true}/>
+  </>
 
   const [auth, setAuth] = useState(null)
   const [isLoading, setLoading] = useState(true)

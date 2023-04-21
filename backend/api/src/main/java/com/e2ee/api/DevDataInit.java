@@ -7,26 +7,37 @@ import com.e2ee.api.service.ChatService;
 import com.e2ee.api.service.MessageService;
 import com.e2ee.api.service.UserService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+// TODO: Fix this shit
 @Component
 @Profile("dev")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class DevDataInit implements ApplicationRunner {
 
     private final UserService userService;
     private final MessageService messageService;
     private final ChatService chatService;
 
+    private final ApplicationContext context;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        if (args.containsOption("dev-default-data")) {
+        var configs = context.getBeansOfType(AbstractSecurityWebSocketMessageBrokerConfigurer.class);
+        configs.forEach((k, v) -> System.out.println(k + ": " + v.getClass()));
+        if (args.containsOption("dev-default-data") || true) {
             createDefault();
         }
         if (args.containsOption("dev-generate-data")) {
@@ -38,9 +49,17 @@ public class DevDataInit implements ApplicationRunner {
         }
     }
 
-    private void createDefault() {
-        User admin = userService.createUser(new UserRegistrationDto(new UserCredentialsDto("admin", "admin"),
-                "Admin", "Admin", "admin@mail.ru"));
+    private static final AtomicLong atomic = new AtomicLong(1L);
+
+    @Scheduled(initialDelay = 10, fixedDelay = 10, timeUnit = TimeUnit.SECONDS)
+    public void sendMessage() {
+        messageService.sendMessage(new User(1L, null, null), MessageDto.create(new Chat(1L, false, null),
+                "Hello"+atomic.getAndIncrement()));
+    }
+
+    public void createDefault() {
+
+        User admin = userService.createUser(UserRegistrationDto.create("admin", "admin"));
         User user1 = userService.createUser(new UserRegistrationDto(new UserCredentialsDto("user1", "password1"),
                 "user1", "one", "1@"));
         User user2 = userService.createUser(new UserRegistrationDto(new UserCredentialsDto("user2", "password2"),
@@ -48,9 +67,8 @@ public class DevDataInit implements ApplicationRunner {
         User user3 = userService.createUser(new UserRegistrationDto(new UserCredentialsDto("user3", "password3"),
                 "user3", "three", "3@"));
 
-        Chat chat1 = chatService.createGroupChat(admin, new GroupChatDto("All", List.of(
-                admin.getId(), user1.getId(), user2.getId(), user3.getId())));
-        messageService.sendMessage(admin, new MessageDto(chat1.getId(), "Hello!!!"));
+        Chat chat1 = chatService.createGroupChat(admin, GroupChatDto.create("All", user1, user2, user3));
+        messageService.sendMessage(admin, MessageDto.create(chat1, "Hello!!!"));
         messageService.sendMessage(user1, new MessageDto(chat1.getId(), "Hi"));
         messageService.sendMessage(user2, new MessageDto(chat1.getId(), "Bonjour"));
         messageService.sendMessage(user3, new MessageDto(chat1.getId(), "42"));
@@ -72,6 +90,9 @@ public class DevDataInit implements ApplicationRunner {
         messageService.sendMessage(user1, new MessageDto(chat4.getId(), "2"));
         messageService.sendMessage(admin, new MessageDto(chat4.getId(), "3"));
         messageService.sendMessage(user1, new MessageDto(chat4.getId(), "4"));
+
+        Chat chat5 = chatService.createPersonalChat(admin, PersonalChatDto.with(user2));
+        messageService.sendMessage(admin, new MessageDto(chat5.getId(), "Hi"));
     }
 
     public void generateData(int messageCount, int chatCount, int userCount) {

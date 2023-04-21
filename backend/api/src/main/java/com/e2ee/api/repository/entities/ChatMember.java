@@ -24,6 +24,11 @@ public class ChatMember {
     private Long chatId;
     private Long userId;
 
+    public ChatMember(Long chatId, Long userId) {
+        this.chatId = chatId;
+        this.userId = userId;
+    }
+
     public static Function<Long, ChatMember> mapping(Long chatId) {
         return userId -> ChatMember.builder()
                 .chatId(chatId)

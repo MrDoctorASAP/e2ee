@@ -27,6 +27,7 @@ public interface BatchRepository extends JpaRepository<Chat, Long> {
                 MESSAGE.ID AS messageId,
                 MESSAGE.DATE AS messageDate,
                 MESSAGE.MESSAGE AS messageText,
+                GROUP_CHAT_INFO.OWNER_ID AS ownerId
             FROM (
                 SELECT MAX(MESSAGE.ID) AS MAX FROM MESSAGE
                     LEFT JOIN CHAT_MEMBER ON CHAT_MEMBER.CHAT_ID = MESSAGE.CHAT_ID WHERE CHAT_MEMBER.USER_ID = ?1
@@ -48,6 +49,6 @@ public interface BatchRepository extends JpaRepository<Chat, Long> {
                 LEFT JOIN USER_PROFILE AS UP ON CM.USER_ID = UP.USER_ID
                 WHERE CHAT_MEMBER.USER_ID = ?1
             """, nativeQuery = true)
-    List<IBatchChat> findAllByUserId(Long userId);
+    List<FlatBatchChat> findAllByUserId(Long userId);
 
 }
