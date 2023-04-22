@@ -13,7 +13,7 @@ public class UserRegistrationDto {
     private String lastName;
     private String email;
 
-    public static UserRegistrationDto create(String username, String password) {
+    public static UserRegistrationDto sampleUser(String username, String password) {
         return new UserRegistrationDto(new UserCredentialsDto(username, password),
                 username, username, username + "@gmail.com");
     }

@@ -1,5 +1,7 @@
 package com.e2ee.api.controller;
 
+import com.e2ee.api.controller.dto.BatchChat;
+import com.e2ee.api.controller.dto.BatchMessages;
 import com.e2ee.api.controller.dto.FlatUnseenChat;
 import com.e2ee.api.controller.dto.UserDto;
 import com.e2ee.api.repository.batch.FlatBatchChat;
@@ -31,36 +33,16 @@ public class BatchController {
     private final UserAuthenticationService authService;
     private final BatchService batchService;
 
-    @GetMapping("/messages/{chatId}")
-    public List<BatchMessage> getMessages(@PathVariable Long chatId) {
+    @GetMapping("/chat/{chatId}")
+    public BatchMessages getMessages(@PathVariable Long chatId) {
         User user = authService.getAuthenticatedUser();
-        return batchService.getMessages(user, chatId);
+        return batchService.getMessages(user, chatId, 0, Integer.MAX_VALUE);
     }
 
     @GetMapping("/chats")
-    public List<FlatBatchChat> getChats() {
+    public List<BatchChat> getChats() {
         User user = authService.getAuthenticatedUser();
         return batchService.getChats(user);
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BatchMessage {
-        private UserDto sender;
-        private Message message;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BatchChat {
-        private Chat chat;
-        private GroupChatInfo group;
-        private UserDto personal;
-        private FlatUnseenChat unseen;
-        private UserDto sender;
-        private Message lastMessage;
     }
 
 }

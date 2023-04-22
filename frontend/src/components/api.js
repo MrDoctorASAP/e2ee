@@ -40,12 +40,12 @@ export async function getChats(auth) {
 }
 
 export async function getMessages(auth, chatId) {
-    return await get(auth, 'http://localhost:8080/api/v1/batch/messages/' + chatId)
+    return await get(auth, 'http://localhost:8080/api/v1/batch/chat/' + chatId)
 }
 
 export async function sendMessage(auth, chatId, message) {
     return await post(auth, {chatId, message},
-         'http://localhost:8080/api/v1/message/send/')
+         'http://localhost:8080/api/v1/message/send')
 }
 
 // export async function getMessages(chatId, token) {

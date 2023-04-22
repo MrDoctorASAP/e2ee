@@ -8,6 +8,7 @@ import com.e2ee.api.repository.entities.UserProfile;
 import com.e2ee.api.service.exceptons.ServiceException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -34,5 +35,11 @@ public class UserProfileService {
                 .stream()
                 .map(UserDto.mapping())
                 .toList();
+    }
+
+    public UserDto getUser(Long userId) {
+        return userProfileRepository.findByUserId(userId)
+                .map(UserDto.mapping())
+                .orElseThrow(() -> new UsernameNotFoundException("" + userId));
     }
 }

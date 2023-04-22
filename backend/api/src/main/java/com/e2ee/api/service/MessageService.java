@@ -2,6 +2,8 @@ package com.e2ee.api.service;
 
 import com.e2ee.api.controller.dto.FlatLastMessage;
 import com.e2ee.api.controller.dto.MessageDto;
+import com.e2ee.api.controller.dto.MessageEventDto;
+import com.e2ee.api.controller.dto.UserDto;
 import com.e2ee.api.repository.MessageRepository;
 import com.e2ee.api.repository.entities.Message;
 import com.e2ee.api.repository.entities.User;
@@ -22,6 +24,7 @@ public class MessageService {
 
     private UserService userService;
     private ChatService chatService;
+    private UserProfileService profileService;
     private UnseenMessageService unseenService;
     private MessagingService messagingService;
 
@@ -36,7 +39,8 @@ public class MessageService {
         chatService.checkIsChatMember(userId, chatId);
         Message message = messageRepository.save(messageDto.toEntity(userId));
         unseenService.publish(user, message);
-        messagingService.publish(message);
+        UserDto senderDto = profileService.getUser(user.getId());
+        messagingService.publish(new MessageEventDto(message, senderDto));
         log.info("Message sent: {}", message);
         return message;
     }

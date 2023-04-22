@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.e2ee.api.controller.dto.GroupChatDto.create;
+import static com.e2ee.api.controller.dto.GroupChatDto.groupChat;
 import static com.e2ee.api.controller.dto.PersonalChatDto.with;
 
 import static org.hamcrest.Matchers.*;
@@ -62,7 +62,7 @@ class ChatServiceTest {
         User user3 = testSupport.createUser();
 
         String chatName = "GroupChat1";
-        Chat groupChat = chatService.createGroupChat(user1, create(chatName, user2, user3));
+        Chat groupChat = chatService.createGroupChat(user1, groupChat(chatName, user2, user3));
 
         List<Long> actualMembersIds = chatService.getChatMembers(user1, groupChat.getId())
                 .stream().map(ChatMember::getUserId).sorted().toList();
@@ -80,7 +80,7 @@ class ChatServiceTest {
         User user3 = testSupport.createUser();
 
         String chatName = "GroupChat1";
-        Chat groupChat = chatService.createGroupChat(user1, create(chatName, user2, user3));
+        Chat groupChat = chatService.createGroupChat(user1, groupChat(chatName, user2, user3));
         assertThat(groupChat.isPersonal(), is(false));
         assertThat(groupChat.getGroupChatInfo().getName(), is(equalTo(chatName)));
         assertThat(groupChat.getGroupChatInfo().getOwnerId(), is(equalTo(user1.getId())));
@@ -99,7 +99,7 @@ class ChatServiceTest {
         User user3 = testSupport.createUser();
 
         Chat chat12 = chatService.createPersonalChat(user1, with(user2));
-        Chat chat123 = chatService.createGroupChat(user2, create("123", user1, user3));
+        Chat chat123 = chatService.createGroupChat(user2, groupChat("123", user1, user3));
         Chat chat23 = chatService.createPersonalChat(user3, with(user2));
 
         assertThat(chatService.getChats(user1), containsInAnyOrder(chat12, chat123));

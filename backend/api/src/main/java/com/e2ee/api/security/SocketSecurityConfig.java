@@ -22,8 +22,8 @@ public class SocketSecurityConfig extends AbstractSecurityWebSocketMessageBroker
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/gs-guide-websocket")
-                .setAllowedOriginPatterns("*")
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins("http://localhost:3000")
                 .withSockJS();
     }
 

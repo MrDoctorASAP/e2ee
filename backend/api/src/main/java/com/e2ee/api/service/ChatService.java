@@ -64,6 +64,7 @@ public class ChatService {
         return chat;
     }
 
+    @Transactional
     public List<Chat> getChats(User user) {
         userService.checkUserExists(user);
         return chatRepository.findAllByUserId(user.getId());

@@ -2,9 +2,9 @@ logging:
   file:
     name: "logs.log"
 spring:
-  autoconfigure:
-    exclude[0]: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-    exclude[1]: org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
+#  autoconfigure:
+#    exclude[0]: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+#    exclude[1]: org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
   datasource:
     url: jdbc:h2:mem:memdb
     username: sa
@@ -20,3 +20,7 @@ jwt:
   token:
     secret: RWFRWFRWFWRFDSEQGTHTEDDWFEWGHTBRWEAD
     expired: 120000000
+
+security:
+  access-control-allow-origin: "http://localhost:3000"
+

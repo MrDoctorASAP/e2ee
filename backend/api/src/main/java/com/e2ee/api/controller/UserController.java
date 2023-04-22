@@ -6,6 +6,7 @@ import com.e2ee.api.controller.dto.UserProfileDto;
 import com.e2ee.api.service.AvatarService;
 import com.e2ee.api.service.UserProfileService;
 import com.e2ee.api.service.exceptons.ServiceException;
+import jakarta.validation.ValidationException;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.ValidationException;
 import java.util.List;
 import java.util.Optional;
 

@@ -1,9 +1,6 @@
 package com.e2ee.api;
 
-import com.e2ee.api.controller.dto.AuthenticationTokenDto;
-import com.e2ee.api.controller.dto.GroupChatDto;
-import com.e2ee.api.controller.dto.MessageDto;
-import com.e2ee.api.controller.dto.UserCredentialsDto;
+import com.e2ee.api.controller.dto.*;
 import com.e2ee.api.repository.entities.Chat;
 import com.e2ee.api.repository.entities.Message;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -20,9 +17,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -37,26 +37,32 @@ public class ChatTest {
     @Test
     @SneakyThrows
     void messagingTest() {
-        UserCredentialsDto user1 = new UserCredentialsDto("username1", "password1");
+
+        UserCredentialsDto credentials1 = new UserCredentialsDto("messagingTest1", "password1");
+        UserRegistrationDto details1 = new UserRegistrationDto(credentials1, "User", "Name", "username@mail.ru");
         String token1s = mvc.perform(post("/api/v1/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(user1)))
+                        .content(mapper.writeValueAsString(details1))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
+
         AuthenticationTokenDto token1 = mapper.readValue(token1s, AuthenticationTokenDto.class);
         System.out.println(token1);
 
-        UserCredentialsDto user2 = new UserCredentialsDto("username2", "password2");
+        UserCredentialsDto credentials2 = new UserCredentialsDto("messagingTest2", "password2");
+        UserRegistrationDto details2 = new UserRegistrationDto(credentials2, "User", "Name", "username@mail.ru");
         String token2s = mvc.perform(post("/api/v1/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(user2)))
+                        .content(mapper.writeValueAsString(details2))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
+                .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
+
         AuthenticationTokenDto token2 = mapper.readValue(token2s, AuthenticationTokenDto.class);
         System.out.println(token2);
 
@@ -97,6 +103,7 @@ public class ChatTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
+
         mapper.readValue(messagesJson, new TypeReference<List<Message>>() {})
             .forEach(System.out::println);
     }

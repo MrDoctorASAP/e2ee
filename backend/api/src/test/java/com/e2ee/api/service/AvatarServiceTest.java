@@ -35,7 +35,6 @@ class AvatarServiceTest {
 
         assertThat(avatar.getWidth(), is(equalTo(width)));
         assertThat(avatar.getHeight(), is(equalTo(height)));
-
     }
 
     @Test

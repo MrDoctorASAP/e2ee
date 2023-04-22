@@ -6,7 +6,7 @@ function LoginPage({ setAuth, setLoading, ...props }) {
   const [password, setPassword] = useState('')
   const onLogin = () => {
     setLoading(true)
-    fetch('http://localhost:8080/api/v1/auth/loginOrRegister', {
+    fetch('http://localhost:8080/api/v1/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'Application/json',

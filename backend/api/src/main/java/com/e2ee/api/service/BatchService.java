@@ -1,6 +1,10 @@
 package com.e2ee.api.service;
 
 import com.e2ee.api.controller.BatchController;
+import com.e2ee.api.controller.dto.BatchChat;
+import com.e2ee.api.controller.dto.BatchMessages;
+import com.e2ee.api.controller.dto.ShortMessage;
+import com.e2ee.api.controller.dto.UserDto;
 import com.e2ee.api.repository.batch.BatchRepository;
 import com.e2ee.api.repository.batch.FlatBatchChat;
 import com.e2ee.api.repository.entities.*;
@@ -8,41 +12,36 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class BatchService {
 
-    private final UserService userService;
     private final ChatService chatService;
     private final MessageService messageService;
     private final UserProfileService profileService;
-    private final UnseenMessageService unseenService;
 
     private final BatchRepository batchRepository;
 
-    public List<BatchController.BatchMessage> getMessages(User user, Long chatId) {
-//        Long userId = user.getId();
-//        if (!chatRepository.existsById(chatId)) {
-//            throw new RuntimeException("ChatNotFound");
-//        }
-//        if (!memberRepository.existsByChatIdAndUserId(chatId, userId)) {
-//            throw new RuntimeException("NotChatMember");
-//        }
-//        List<Message> messages = messageRepository.findAllByChatId(chatId);
-//        List<Long> userIds = messages.stream().map(Message::getUserId).distinct().toList();
-//        List<UserDto> userProfiles = profileService.getUserProfiles(userIds);
-//        return messages.stream()
-//                .map(message -> new BatchController.BatchMessage(userProfiles.stream()
-//                        .filter(profile -> profile.getUserId().equals(message.getUserId()))
-//                        .findFirst()
-//                        .get(), message))
-//                .toList();
-        return null;
+    public BatchMessages getMessages(User user, Long chatId, int page, int count) {
+        chatService.checkIsChatMember(user.getId(), chatId);
+        List<UserDto> members = profileService.getUsers(
+                chatService.getChatMembers(chatId)
+                        .stream()
+                        .map(ChatMember::getUserId)
+                        .toList());
+        List<ShortMessage> messages = messageService.getMessages(user, chatId, page, count)
+                .stream()
+                .map(ShortMessage.mapping())
+                .toList();
+        return new BatchMessages(members, messages);
     }
 
-    public List<FlatBatchChat> getChats(User user) {
-        // TODO: Remove users
-        return batchRepository.findAllByUserId(user.getId());
+    public List<BatchChat> getChats(User user) {
+        return batchRepository.findAllByUserId(user.getId())
+                .stream()
+                .map(BatchChat.mapping())
+                .toList();
     }
 }

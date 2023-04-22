@@ -3,3 +3,9 @@ spring:
     banner-mode: off
   profiles:
     active: dev
+
+#jpa:
+#  properties:
+#    hibernate:
+#      jdbc:
+#        enable_lazy_load_no_trans: true

@@ -8,6 +8,7 @@ import com.e2ee.api.repository.entities.User;
 import com.e2ee.api.service.UserAuthenticationService;
 import com.e2ee.api.service.UserService;
 import com.e2ee.api.service.exceptons.AuthException;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 
 @Slf4j
 @RestController

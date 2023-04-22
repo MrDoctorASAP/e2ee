@@ -23,7 +23,7 @@ public class MessageDto {
                 .build();
     }
 
-    public static MessageDto create(Chat chat, String message) {
+    public static MessageDto message(Chat chat, String message) {
         return new MessageDto(chat.getId(), message);
     }
 
