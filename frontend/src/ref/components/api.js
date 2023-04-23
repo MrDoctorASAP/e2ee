@@ -31,9 +31,22 @@ async function post(auth, body, url) {
     }).catch(console.log)
 }
 
-// export async function login(username, password) {
-    // return await post(auth, {username, password}, 'http://localshot:8080/api/v1/auth/loginOrRegister')
-// }
+export async function login(username, password) {
+    return await fetch('http://localhost:8080/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'Application/json'
+        },
+        body: JSON.stringify({username, password})
+    }).then(resp => {
+        if (resp.ok) {
+            return resp.json()
+        } else {
+            console.log('Code ' + resp.status + ' on POST login')
+            return null
+        }
+    }).catch(console.log)
+}
 
 export async function getChats(auth) {
     return await get(auth, 'http://localhost:8080/api/v1/batch/chats')
@@ -46,6 +59,11 @@ export async function getMessages(auth, chatId) {
 export async function sendMessage(auth, chatId, message) {
     return await post(auth, {chatId, message},
          'http://localhost:8080/api/v1/message/send')
+}
+
+export function seen(auth, chatId) {
+    get(auth, 'http://localhost:8080/api/v1/unseen/seen?chatId='+chatId)
+        .catch(console.log)
 }
 
 // export async function getMessages(chatId, token) {
