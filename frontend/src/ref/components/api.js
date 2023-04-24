@@ -12,6 +12,17 @@ async function get(auth, url) {
         }).catch(console.log)
 }
 
+async function get_nobody(auth, url) {
+    const bearer = 'Bearer ' + auth.token
+    return await fetch(url, { headers: { 'authorization': bearer } })
+        .then(resp => {
+            if (!resp.ok) {
+                console.log('Code ' + resp.status + ' on GET ' + url)
+            }
+            return null
+        }).catch(console.log)
+}
+
 async function post(auth, body, url) {
     const bearer = 'Bearer ' + auth.token
     return await fetch(url, {
@@ -62,7 +73,7 @@ export async function sendMessage(auth, chatId, message) {
 }
 
 export function seen(auth, chatId) {
-    get(auth, 'http://localhost:8080/api/v1/unseen/seen?chatId='+chatId)
+    get_nobody(auth, 'http://localhost:8080/api/v1/unseen/seen?chatId='+chatId)
         .catch(console.log)
 }
 

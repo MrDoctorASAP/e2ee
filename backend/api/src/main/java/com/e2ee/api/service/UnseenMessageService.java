@@ -8,6 +8,7 @@ import com.e2ee.api.repository.entities.UnseenMessage;
 import com.e2ee.api.repository.entities.User;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class UnseenMessageService {
         return unseenRepository.getUnseenChatsByUserId(user.getId());
     }
 
+    @Transactional
     public void seen(User user, Long chatId) {
         userService.checkUserExists(user);
         chatService.checkChatExistsById(chatId);

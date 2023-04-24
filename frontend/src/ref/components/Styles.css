@@ -84,12 +84,12 @@ body {
     border-right: 1px solid #0000000d;
 }
 
-.rce-mbox-right-notch {
+/* .rce-mbox-right-notch {
     display: none;
 }
 .rce-mbox-left-notch {
     display: none;
-}
+} */
 
 .rce-avatar {
     border-radius: 100px;

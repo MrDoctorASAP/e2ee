@@ -91,8 +91,8 @@ function ChatPage({ auth, ...props }) {
     }
     setChats(chats.map(chatOnMessageReceiveUpdater(currentChatId, message.chatId, shortMessage, sender)))
     if (messages.has(message.chatId)) {
-      setMessages(new Map([...messages].concat([[message.chatId, 
-        [...messages.get(message.chatId), shortMessage]
+      setMessages(new Map([...messages].concat([[message.chatId,
+      [...messages.get(message.chatId), shortMessage]
       ]])))
     }
   }
@@ -112,7 +112,7 @@ function ChatPage({ auth, ...props }) {
   const onChatClick = (chatId) => {
     setCurrentChatId(chatId)
     setChats(chats.map(seenChatUpdater(chatId)))
-    // seen(auth, chatId)
+    seen(auth, chatId)
   }
 
   const onSendMessage = (message) => {
@@ -150,7 +150,8 @@ function ChatPage({ auth, ...props }) {
       chatMembers={chatMembers.get(currentChatId)} onSend={console.log} />
     : <LoadingPage />
 
-  const messageInput = currentChat ? <MessageInput onSendMessage={onSendMessage} /> : undefined
+  const messageInput = currentChat ?
+    <MessageInput onSendMessage={onSendMessage} /> : undefined
 
   return <div>
     {socket}

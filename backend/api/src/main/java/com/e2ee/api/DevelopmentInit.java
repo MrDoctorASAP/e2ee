@@ -39,9 +39,13 @@ public class DevelopmentInit implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         boolean messageSender = args.containsOption("dev-message-sender");
-        boolean defaultData = args.containsOption("dev-default-data") || true;
+        boolean defaultData = args.containsOption("dev-default-data");
+        boolean charactersData = args.containsOption("dev-characters-data") || true;
         boolean generateData = args.containsOption("dev-generate-data");
-        if (defaultData || (messageSender && !generateData)) {
+        if (charactersData && !defaultData) {
+            createCharacters();
+        }
+        if (defaultData || (messageSender && !generateData && !charactersData)) {
             createDefault();
         }
         if (generateData) {
@@ -62,6 +66,87 @@ public class DevelopmentInit implements ApplicationRunner {
             messageService.sendMessage(new User(1L, null, null), message(new Chat(1L, false, null),
                     "Hello"+ messageNumber.incrementAndGet()));
         }
+    }
+
+    public void createCharacters() {
+
+        User admin = userService.createUser(new UserRegistrationDto(
+                new UserCredentialsDto("admin", "admin"), "Admin", "42", ""));
+        User user1 = userService.createUser(new UserRegistrationDto(
+                new UserCredentialsDto("user1", "password1"), "Уинстон", "Черчилль", ""));
+        User user2 = userService.createUser(new UserRegistrationDto(
+                new UserCredentialsDto("user2", "password5"), "Мирон", "Янович", ""));
+        User user3 = userService.createUser(new UserRegistrationDto(
+                new UserCredentialsDto("user3", "password3"), "Медведь", "Бурый", ""));
+        User user4 = userService.createUser(new UserRegistrationDto(
+                new UserCredentialsDto("user4", "password4"), "Штирлиц", "", ""));
+
+        Chat chat1 = chatService.createPersonalChat(admin, with(user4));
+        messageService.sendMessage(admin, message(chat1, "Вместо привычного голубя в окно залетела голая сова."));
+        messageService.sendMessage(admin, message(chat1, "\"Голосовуха\" - подумал Штирлиц."));
+        messageService.sendMessage(user4, message(chat1, "Штирлиц пришел на встречу со связным в знакомый бар и заказал 100 грамм водки."));
+        messageService.sendMessage(user4, message(chat1, "- Водка у нас закончилась еще два дня назад, - извинился бармен."));
+        messageService.sendMessage(user4, message(chat1, "- Ну, тогда 100 грамм коньячку."));
+        messageService.sendMessage(user4, message(chat1, "- Коньячок у нас закончился вчера, - огорченно сказал бармен."));
+        messageService.sendMessage(user4, message(chat1, "- Ну, а пиво-то есть?"));
+        messageService.sendMessage(user4, message(chat1, "- Увы, закончилось сегодня..."));
+        messageService.sendMessage(user4, message(chat1, "\"Значит, связной уже здесь.\" - подумал Штирлиц"));
+
+        Chat chat2 = chatService.createPersonalChat(admin, with(user1));
+        messageService.sendMessage(user1, message(chat2, "Underidoderidoderidoderido"));
+        messageService.sendMessage(admin, message(chat2, "London is the capital of Great Britain!"));
+        messageService.sendMessage(user1, message(chat2, "Дело не в том, что жить с деньгами очень уж хорошо.\nА в том что без денег не хватает денег."));
+        messageService.sendMessage(admin, message(chat2, "Хорошо сказал"));
+
+        Chat chat3 = chatService.createPersonalChat(admin, with(user3));
+        messageService.sendMessage(user3, message(chat3, "Приходит как-то мужик к практологу:"));
+        messageService.sendMessage(user3, message(chat3, "- Здавствуйте, Василий Иванович. Я к Вам на приём."));
+        messageService.sendMessage(user3, message(chat3, "- Проходи на кушетку."));
+        messageService.sendMessage(user3, message(chat3, "Ну мужик разделся и занял позу."));
+        messageService.sendMessage(user3, message(chat3, "Практолог начал его остамривать."));
+        messageService.sendMessage(user3, message(chat3, "- Ай, почему так больно? Это какой-то медицинский инструмен?"));
+        messageService.sendMessage(user3, message(chat3, "- Это, Петр Иванович, нюанс."));
+        messageService.sendMessage(admin, message(chat3, "\uD83D\uDE02"));
+
+        Chat chat4 = chatService.createGroupChat(admin, groupChat("All", user1, user3, user4, user2));
+        messageService.sendMessage(admin, message(chat4, "Hello!!!"));
+        messageService.sendMessage(user1, message(chat4, "Hi"));
+        messageService.sendMessage(user3, message(chat4, "42"));
+        messageService.sendMessage(user4, message(chat4, "Гутен таг"));
+        messageService.sendMessage(user2, message(chat4, "Гээнг гэнг"));
+
+        Chat chat5 = chatService.createPersonalChat(admin, with(user2));
+        messageService.sendMessage(user2, message(chat5, """
+                Я не просто баламут, хам,
+                Я свой собственный Плутарх:
+                Это летопись, нужны разные флоу?
+                У меня девять есть, зови меня Wu-Tang.
+                ..."""));
+        messageService.sendMessage(admin, message(chat5, "Опять ты за своё..."));
+        messageService.sendMessage(admin, message(chat5, "Дед, прими таблетки."));
+        messageService.sendMessage(user2, message(chat5, """
+                Если тут кто-то курд, то он не Воннегут, дам
+                Слово, что я не расист, но тут каждый второй орангутан.
+                Всюду блуд, Болливуд, хлам.
+                Это Е16, вперемежку нации Бангладеш, вьетнамцы,
+                ..."""));
+
+        Chat chat6 = chatService.createGroupChat(admin, groupChat("Англия", admin, user1, user2));
+        messageService.sendMessage(admin, message(chat6, "\uD83D\uDE00"));
+        messageService.sendMessage(user1, message(chat6, "\uD83D\uDE01\uD83D\uDE01\uD83D\uDE01\uD83D\uDE01"));
+        messageService.sendMessage(user2, message(chat6, "\uD83D\uDE04\uD83D\uDE04"));
+        messageService.sendMessage(admin, message(chat6, "\uD83D\uDDFC"));
+        messageService.sendMessage(user1, message(chat6, "\uD83D\uDE02"));
+
+        Chat chat7 = chatService.createGroupChat(admin, groupChat("Трио", admin, user3, user4));
+        messageService.sendMessage(user4, message(chat7, "Медведь, прокатимся на вертолёте?"));
+        messageService.sendMessage(user3, message(chat7, "Ну хоть ты то не начинай, Штирлиц."));
+        messageService.sendMessage(user3, message(chat7, "И так все придумывают про нас шутки."));
+        messageService.sendMessage(user4, message(chat7, "Да, и со мной самые смешные."));
+
+        Chat chat8 = chatService.createGroupChat(user1, groupChat("Empty test", user2));
+        Chat chat9 = chatService.createPersonalChat(user1, with(user2));
+
     }
 
     public void createDefault() {

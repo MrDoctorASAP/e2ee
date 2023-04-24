@@ -10,9 +10,12 @@ function Chats({ chats, onChatClick, ...props }) {
     const subtitle = chat.last ?
       chat.last.sender.firstName + ': ' + chat.last.message.text :
       undefined
+    const avatar = chat.details.personal ? 
+    'http://localhost:8080/api/v1/avatar/user/'+chat.personal.recipient.userId:
+    'http://localhost:8080/api/v1/avatar/chat/'+chat.details.chatId
     return {
       id: chat.details.chatId,
-      avatar: 'http://localhost:8080/api/v1/user/avatar?userId=' + chat.details.chatId,
+      avatar: avatar,
       alt: '',
       title: title,
       subtitle: subtitle,

@@ -26,7 +26,6 @@ import java.util.Optional;
 public class UserController {
 
     private final UserProfileService userProfileService;
-    private final AvatarService avatarService;
 
     @PostMapping("/users")
     public List<UserDto> getUsers(@RequestBody List<Long> userIds) {
@@ -36,17 +35,6 @@ public class UserController {
     @GetMapping("/profile")
     public UserProfileDto getProfile(@RequestParam Long userId) {
         return userProfileService.getUserProfile(userId);
-    }
-
-    @SneakyThrows
-    @GetMapping(value = "/avatar", produces = MediaType.IMAGE_JPEG_VALUE)
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public byte[] getAvatar(@RequestParam Long userId,
-                            @RequestParam Optional<Integer> width,
-                            @RequestParam Optional<Integer> height) {
-        return avatarService.generateDefaultAvatar(userId,
-                 width.filter(x->x>1).filter(x->x<1000).orElse(150),
-                height.filter(x->x>1).filter(x->x<1000).orElse(150));
     }
 
     @ExceptionHandler(AuthenticationException.class)
