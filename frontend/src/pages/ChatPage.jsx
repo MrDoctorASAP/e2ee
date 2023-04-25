@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import {useEffect, useRef, useState} from "react"
 import LoadingPage from "./LoadingPage"
 import SockJsClient from 'react-stomp';
 import { getChats, getMessages, seen, sendMessage } from "../ref/components/api";
@@ -6,58 +6,25 @@ import Chats from "../components/Chats";
 import Chat from "../components/Chat";
 import '../ref/components/Styles.css'
 import { MessageInput } from "@minchat/react-chat-ui";
-
-function seenChatUpdater(chatId) {
-  return chat => {
-    if (chat.details.chatId != chatId) {
-      return chat
-    }
-    return {
-      ...chat,
-      details: {
-        ...chat.details,
-        unseen: 0
-      }
-    }
-  }
-}
-
-function chatOnMessageReceiveUpdater(currectChatId, chatId, message, sender) {
-  return chat => {
-    if (chat.details.chatId != chatId) {
-      return chat
-    }
-    return {
-      ...chat,
-      details: {
-        ...chat.details,
-        unseen: currectChatId != chatId ? chat.details.unseen + 1 : 0
-      },
-      last: {
-        sender,
-        message
-      }
-    }
-  }
-}
+import { useChatCache, useChatList } from "../hooks/ChatHook";
 
 function ChatPage({ auth, ...props }) {
 
   const [socketLoading, setSocketLoading] = useState(true)
   const [chatsLoading, setChatsLoading] = useState(true)
 
-  const [chats, setChats] = useState([])
-  const [messages, setMessages] = useState(new Map())
-  const [chatMembers, setChatMembers] = useState(new Map())
+  const chatList = useChatList()
+  const chatCache = useChatCache()
   const [currentChatId, setCurrentChatId] = useState(null)
+
+  const chatEndRef = useRef(null)
 
   useEffect(() => {
     if (!auth) return
     if (socketLoading) return
     getChats(auth)
       .then(chats => {
-        console.log(chats)
-        setChats(chats)
+        chatList.setChats(chats)
         setChatsLoading(false)
       })
   }, [auth, socketLoading])
@@ -67,40 +34,43 @@ function ChatPage({ auth, ...props }) {
     if (!auth) return
     if (!currentChatId) return
 
-    if (!messages.has(currentChatId)) {
-      messages.set(currentChatId, null)
+    if (!chatCache.isLoading(currentChatId) && !chatCache.isLoaded(currentChatId)) {
+      chatCache.markChatLoading(currentChatId)
       getMessages(auth, currentChatId)
         .then((chat) => {
-          setChatMembers(new Map([...chatMembers].concat([[currentChatId,
-            new Map(chat.members.map(member => [member.userId, member]))
-          ]])))
-          setMessages(new Map([...messages].concat([[currentChatId, chat.messages]])))
+          const messages = chat.messages
+          const members = new Map(chat.members.map(member => [member.userId, member]))
+          chatCache.setChat(currentChatId, messages, members)
         })
     }
   }, [auth, currentChatId])
 
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView()
+  }, [currentChatId])
+
   const onMessageReceive = (messageEvent) => {
-    // TODO: Fix back
     const message = messageEvent.message
     const sender = messageEvent.sender
+    const chatId = message.chatId
     const shortMessage = {
       messageId: message.id,
       senderId: message.userId,
       text: message.message,
       date: message.date
     }
-    setChats(chats.map(chatOnMessageReceiveUpdater(currentChatId, message.chatId, shortMessage, sender)))
-    if (messages.has(message.chatId)) {
-      setMessages(new Map([...messages].concat([[message.chatId,
-      [...messages.get(message.chatId), shortMessage]
-      ]])))
+    chatCache.addMessageToChat(chatId, shortMessage)
+    chatList.setLastMessage(chatId, sender, shortMessage)
+    if (currentChatId !== chatId) {
+      chatList.incrementUnseen(chatId)
+    } else {
+      seen(auth, chatId)
     }
+    chatEndRef.current?.scrollIntoView()
   }
 
   const onSocketMessage = (body, dest) => {
-    console.log(body)
-    console.log(dest)
-    if (dest == '/topic/message') {
+    if (dest === '/topic/message') {
       onMessageReceive(body)
     }
   }
@@ -111,7 +81,7 @@ function ChatPage({ auth, ...props }) {
 
   const onChatClick = (chatId) => {
     setCurrentChatId(chatId)
-    setChats(chats.map(seenChatUpdater(chatId)))
+    chatList.cleanUnseen(chatId)
     seen(auth, chatId)
   }
 
@@ -136,19 +106,13 @@ function ChatPage({ auth, ...props }) {
     </>
   }
 
-  const currentChat = currentChatId ?
-    chats.filter(chat => chat.details.chatId == currentChatId)[0] : null
+  const currentChat = currentChatId ? chatList.getChat(currentChatId) : null
 
   const currentChatName = currentChat ?
     (currentChat.details.personal ?
       currentChat.personal.recipient.firstName + ' ' + currentChat.personal.recipient.lastName :
       currentChat.group.chatName)
     : ''
-
-  const chat = messages.get(currentChatId) !== null ?
-    <Chat userId={auth.userId} messages={messages.get(currentChatId)}
-      chatMembers={chatMembers.get(currentChatId)} onSend={console.log} />
-    : <LoadingPage />
 
   const messageInput = currentChat ?
     <MessageInput onSendMessage={onSendMessage} /> : undefined
@@ -158,20 +122,23 @@ function ChatPage({ auth, ...props }) {
     <div className='middle'>
       <div className='middle-offset'>
         <div className='chats-list'>
-          <Chats chats={chats} onChatClick={onChatClick} />
+          <Chats chats={chatList.getChats()} onChatClick={onChatClick} />
         </div>
         <div className='chat-header'>
           {currentChatName}
         </div>
         <div className='current-chat'>
-          {chat}
+          <Chat
+            chat={chatCache.getChat(currentChatId)}
+            userId={auth.userId}
+          />
+          <div ref={chatEndRef}></div>
         </div>
         <div className='input-field-container'>
           {messageInput}
         </div>
       </div>
     </div>
-
   </div>
 }
 

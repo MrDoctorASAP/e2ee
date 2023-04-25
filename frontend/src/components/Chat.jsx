@@ -1,10 +1,16 @@
-import { MessageBox, SystemMessage } from "react-chat-elements"
+import {MessageBox} from "react-chat-elements"
+import LoadingPage from "../pages/LoadingPage";
 
-function Chat({ userId, messages, chatMembers, ...props }) {
-  if (!messages) return <div></div>
-  const messageBoxes = messages.map(message => {
-    const pos = message.senderId != userId ? 'left' : 'right'
-    const sender = chatMembers.get(message.senderId)
+function Chat({userId,chat, ...props}) {
+  if (chat === undefined) {
+    return <></>
+  }
+  if (chat === null) {
+    return <LoadingPage/>
+  }
+  return chat.messages.map(message => {
+    const pos = message.senderId !== userId ? 'left' : 'right'
+    const sender = chat.members.get(message.senderId)
     return <MessageBox
       key={message.messageId}
       position={pos}
@@ -12,12 +18,9 @@ function Chat({ userId, messages, chatMembers, ...props }) {
       type={'text'}
       title={sender.firstName}
       text={message.text}
-      // dateString={new Date(message.date).toTimeString()}
       notch={false}
-    // status='read'
     />
   })
-  return messageBoxes
 }
 
 export default Chat
