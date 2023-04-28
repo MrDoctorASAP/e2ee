@@ -1,4 +1,4 @@
-// import E2EE from '@chatereum/react-e2ee';
+import E2EE from '@chatereum/react-e2ee';
 import 'react-chat-elements/dist/main.css'
 import './components/Styles.css'
 import ChatPage from './components/ChatPage';
@@ -9,7 +9,9 @@ import { getMessages } from './components/api';
 import SockJsClient from 'react-stomp';
 
 function ChatApp() {
-  
+
+  return <></>
+
   return <>
     <SockJsClient url='http://localhost:8080/gs-guide-websocket' topics={['/topic/message']}
           onMessage={(msg) => { console.log(msg); }} debug={true}/>

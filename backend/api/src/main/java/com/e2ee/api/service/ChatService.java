@@ -1,5 +1,7 @@
 package com.e2ee.api.service;
 
+import com.e2ee.api.controller.dto.BatchChat;
+import com.e2ee.api.controller.dto.ChatCreationEventDto;
 import com.e2ee.api.controller.dto.GroupChatDto;
 import com.e2ee.api.controller.dto.PersonalChatDto;
 import com.e2ee.api.repository.*;
@@ -22,8 +24,10 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final ChatMemberRepository memberRepository;
     private final GroupChatInfoRepository infoRepository;
+    private final MessagingService messagingService;
 
     private final UserService userService;
+    private final UserProfileService profileService;
 
     @Transactional
     public Chat createPersonalChat(User user, PersonalChatDto personalChat) {
@@ -34,6 +38,15 @@ public class ChatService {
                 new ChatMember(chat.getId(), personalChat.getUserId())
         ));
         log.info("Create personal char: {} {}", chat, chatMembers);
+        messagingService.publish(new ChatCreationEventDto(
+                new BatchChat(
+                        new BatchChat.ChatDetails(chat.getId(), true, 0),
+                        null,
+                        new BatchChat.PersonalChatDetails(profileService.getUser(personalChat.getUserId())),
+                        null
+                ),
+                profileService.getUsers(chatMembers.stream().map(ChatMember::getUserId).toList())
+        ));
         return chat;
     }
 

@@ -6,7 +6,7 @@ async function get(auth, url, noBody) {
       if (resp.ok) {
         if (noBody) {
           return null
-        }  
+        }
         return resp.json()
       } else {
         console.log('Code ' + resp.status + ' ' + resp.statusText + ' on GET ' + url)

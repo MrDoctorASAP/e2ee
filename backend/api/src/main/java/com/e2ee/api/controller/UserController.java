@@ -4,6 +4,7 @@ import com.e2ee.api.controller.dto.ApiErrorDto;
 import com.e2ee.api.controller.dto.UserDto;
 import com.e2ee.api.controller.dto.UserProfileDto;
 import com.e2ee.api.service.AvatarService;
+import com.e2ee.api.service.SearchService;
 import com.e2ee.api.service.UserProfileService;
 import com.e2ee.api.service.exceptons.ServiceException;
 import jakarta.validation.ValidationException;
@@ -26,6 +27,12 @@ import java.util.Optional;
 public class UserController {
 
     private final UserProfileService userProfileService;
+    private final SearchService searchService;
+
+    @GetMapping("/search")
+    public List<UserDto> search(@RequestParam String query) {
+        return searchService.search(query);
+    }
 
     @PostMapping("/users")
     public List<UserDto> getUsers(@RequestBody List<Long> userIds) {

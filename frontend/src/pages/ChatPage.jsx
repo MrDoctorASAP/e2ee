@@ -1,12 +1,19 @@
-import {useEffect, useRef, useState} from "react"
+import { useEffect, useRef, useState } from "react"
 import LoadingPage from "./LoadingPage"
 import SockJsClient from 'react-stomp';
-import { getChats, getMessages, seen, sendMessage } from "../ref/components/api";
+import { createPersonalChat, getChats, getMessages, seen, sendMessage } from "../api/ChatApi";
 import Chats from "../components/Chats";
 import Chat from "../components/Chat";
 import '../ref/components/Styles.css'
 import { MessageInput } from "@minchat/react-chat-ui";
 import { useChatCache, useChatList } from "../hooks/ChatHook";
+import UserChoice from "../components/UserChoice";
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 
 function ChatPage({ auth, ...props }) {
 
@@ -16,6 +23,8 @@ function ChatPage({ auth, ...props }) {
   const chatList = useChatList()
   const chatCache = useChatCache()
   const [currentChatId, setCurrentChatId] = useState(null)
+
+  const [showPersonal, setShowPersonal] = useState(false)
 
   const chatEndRef = useRef(null)
 
@@ -44,9 +53,8 @@ function ChatPage({ auth, ...props }) {
         })
     }
   }, [auth, currentChatId])
-
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView()
+    // chatEndRef.current?.scrollIntoView()
   }, [currentChatId])
 
   const onMessageReceive = (messageEvent) => {
@@ -66,12 +74,20 @@ function ChatPage({ auth, ...props }) {
     } else {
       seen(auth, chatId)
     }
-    chatEndRef.current?.scrollIntoView()
+    // chatEndRef.current?.scrollIntoView()
+  }
+
+  const onChatCreate = (chatCreationEvent) => {
+    if (chatCreationEvent.members.map(m => m.userId).find(id => id === auth.userId)) {
+      chatList.addChat(chatCreationEvent.chat)
+    }
   }
 
   const onSocketMessage = (body, dest) => {
     if (dest === '/topic/message') {
       onMessageReceive(body)
+    } else if (dest === '/topic/chat') {
+      onChatCreate(body)
     }
   }
 
@@ -93,7 +109,7 @@ function ChatPage({ auth, ...props }) {
 
   const socket = <SockJsClient
     url='http://localhost:8080/ws'
-    topics={['/topic/message']}
+    topics={['/topic/message', '/topic/chat']}
     onMessage={onSocketMessage}
     onConnect={onSocketConnect}
     debug={true}
@@ -117,10 +133,38 @@ function ChatPage({ auth, ...props }) {
   const messageInput = currentChat ?
     <MessageInput onSendMessage={onSendMessage} /> : undefined
 
+  const onCreatePersonalChat = (user) => {
+    setShowPersonal(false)
+    createPersonalChat(auth, { userId: user.userId })
+  }
+
+  // {"timestamp":"2023-04-27T16:17:51.337+00:00","status":404,"error":"Not Found","message":"No message available","path":"/api/v1/chat/create/personal"}
   return <div>
     {socket}
     <div className='middle'>
       <div className='middle-offset'>
+        {/* <div className="plus alt" onClick={e => setShowPersonal(true)}></div> */}
+        <div className="user-profile">
+        <NavDropdown
+                    id="nav-dropdown-dark-example"
+                    title="Dropdown"
+                    menuVariant="light"
+                  >
+                    <NavDropdown.Item href="#action/3.1">
+                      Create personal chat...
+                      </NavDropdown.Item>
+                    <NavDropdown.Item href="#action/3.2">
+                      Create group chat...
+                    </NavDropdown.Item>
+                    <NavDropdown.Item href="#action/3.3">
+                      Create secure chat...
+                    </NavDropdown.Item>
+                    <NavDropdown.Divider />
+                    <NavDropdown.Item href="#action/3.4">
+                      Logout
+                    </NavDropdown.Item>
+                  </NavDropdown>
+        </div>
         <div className='chats-list'>
           <Chats chats={chatList.getChats()} onChatClick={onChatClick} />
         </div>
@@ -139,6 +183,17 @@ function ChatPage({ auth, ...props }) {
         </div>
       </div>
     </div>
+    <UserChoice
+      show={showPersonal}
+      setShow={setShowPersonal}
+      onUserClick={onCreatePersonalChat}
+      exclude={
+        (chatList.getChats()
+          ?.filter(chat => chat.details.personal)
+          ?.map(chat => chat.personal.recipient.userId) ?? [])
+          .concat([auth.userId])
+      }
+    />
   </div>
 }
 

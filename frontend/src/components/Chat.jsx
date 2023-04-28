@@ -1,7 +1,7 @@
 import {MessageBox} from "react-chat-elements"
 import LoadingPage from "../pages/LoadingPage";
 
-function Chat({userId,chat, ...props}) {
+function Chat({userId, chat, ...props}) {
   if (chat === undefined) {
     return <></>
   }

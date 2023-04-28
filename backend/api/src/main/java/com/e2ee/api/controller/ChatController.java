@@ -3,6 +3,7 @@ package com.e2ee.api.controller;
 import com.e2ee.api.controller.dto.ApiErrorDto;
 import com.e2ee.api.controller.dto.GroupChatDto;
 import com.e2ee.api.controller.dto.LastMessageDto;
+import com.e2ee.api.controller.dto.PersonalChatDto;
 import com.e2ee.api.repository.entities.Chat;
 import com.e2ee.api.repository.entities.Message;
 import com.e2ee.api.repository.entities.User;
@@ -37,9 +38,15 @@ public class ChatController {
         User user = authService.getAuthenticatedUser();
         return chatService.getChats(user);
     }
+    
+    @PostMapping("/create/personal")
+    public Chat createPersonal(@RequestBody @Valid PersonalChatDto personalChat) {
+        User user = authService.getAuthenticatedUser();
+        return chatService.createPersonalChat(user, personalChat);
+    }
 
-    @PostMapping("/with")
-    public Chat createChat(@RequestBody @Valid GroupChatDto chat) {
+    @PostMapping("/create/group")
+    public Chat createGroupChat(@RequestBody @Valid GroupChatDto chat) {
         User user = authService.getAuthenticatedUser();
         return chatService.createGroupChat(user, chat);
     }

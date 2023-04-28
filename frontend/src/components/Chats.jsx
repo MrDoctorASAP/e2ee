@@ -1,6 +1,5 @@
 import {ChatList} from "react-chat-elements"
 import "../styles/components/TextMessage.css"
-import {getMessagesTs} from "../api/chatApi";
 
 function compareChats(chat1, chat2) {
   if (chat1.last && chat2.last) {
