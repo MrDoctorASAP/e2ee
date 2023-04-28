@@ -10,7 +10,7 @@ function ChatApp() {
         return <LoadingPage/>
     }
     if (auth && auth.token) {
-        return <ChatPage auth={auth}/>
+        return <ChatPage auth={auth} setAuth={setAuth}/>
     }
     return <LoginPage setAuth={setAuth} setLoading={setLoading}/>
 }

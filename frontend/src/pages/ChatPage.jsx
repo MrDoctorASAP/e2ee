@@ -14,8 +14,9 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import { clear } from "../model/SecureChatStorage";
 
-function ChatPage({ auth, ...props }) {
+function ChatPage({ auth, setAuth, ...props }) {
 
   const [socketLoading, setSocketLoading] = useState(true)
   const [chatsLoading, setChatsLoading] = useState(true)
@@ -122,6 +123,11 @@ function ChatPage({ auth, ...props }) {
     </>
   }
 
+  const logout = () => {
+    clear()
+    setAuth(null)
+  }
+
   const currentChat = currentChatId ? chatList.getChat(currentChatId) : null
 
   const currentChatName = currentChat ?
@@ -147,20 +153,20 @@ function ChatPage({ auth, ...props }) {
         <div className="user-profile">
         <NavDropdown
                     id="nav-dropdown-dark-example"
-                    title="Dropdown"
+                    title={auth.username}
                     menuVariant="light"
                   >
-                    <NavDropdown.Item href="#action/3.1">
+                    <NavDropdown.Item onClick={ e => setShowPersonal(true) }>
                       Create personal chat...
                       </NavDropdown.Item>
-                    <NavDropdown.Item href="#action/3.2">
+                    <NavDropdown.Item>
                       Create group chat...
                     </NavDropdown.Item>
-                    <NavDropdown.Item href="#action/3.3">
+                    <NavDropdown.Item>
                       Create secure chat...
                     </NavDropdown.Item>
                     <NavDropdown.Divider />
-                    <NavDropdown.Item href="#action/3.4">
+                    <NavDropdown.Item onClick={logout}>
                       Logout
                     </NavDropdown.Item>
                   </NavDropdown>
