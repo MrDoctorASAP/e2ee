@@ -21,11 +21,13 @@ public class SecureChatInvite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long senderId;
     private Long recipientId;
     private String secureChatId;
     private String publicKey;
 
-    public SecureChatInvite(Long recipientId, String secureChatId, String publicKey) {
+    public SecureChatInvite(Long senderId, Long recipientId, String secureChatId, String publicKey) {
+        this.senderId = senderId;        
         this.recipientId = recipientId;
         this.secureChatId = secureChatId;
         this.publicKey = publicKey;

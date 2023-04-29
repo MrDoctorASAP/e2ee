@@ -25,6 +25,7 @@ class KeyExchangeServiceTest {
 
     @Test
     public void keyExchange() {
+
         ObjectMapper mapper = new ObjectMapper();
         User user1 = testSupport.createUser();
         User user2 = testSupport.createUser();
@@ -47,7 +48,7 @@ class KeyExchangeServiceTest {
         exchangeService.accept(user2, new AcceptedSecureChatDto(invite.getSecureChatId(), "PUBLIC_USER_2"));
         assertThat(exchangeService.getInvites(user2), hasSize(0));
 
-        List<RecipientKeyDto> exchange = exchangeService.exchange(user1, List.of(secureChatId));
+        List<RecipientKeyDto> exchange = exchangeService.exchange(user1);
         assertThat(exchange, hasSize(1));
 
         System.out.println(" --  EXCHANGE -- ");
@@ -56,7 +57,7 @@ class KeyExchangeServiceTest {
 
         System.out.println(" --  COMPLETE -- ");
         exchangeService.complete(user1, secureChatId);
-        assertThat(exchangeService.exchange(user1, List.of(secureChatId)), hasSize(0));
+        assertThat(exchangeService.exchange(user1), hasSize(0));
     }
 
 }

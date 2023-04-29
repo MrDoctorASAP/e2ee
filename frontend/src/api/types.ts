@@ -89,7 +89,8 @@ export interface ISecureChatId {
 
 export interface ISecureChatInvite {
   secureChatId: string,
-  publicKey: string
+  publicKey: string,
+  sender: IUser
 }
 
 export interface IRecipientKey {
@@ -100,4 +101,14 @@ export interface IRecipientKey {
 export interface IAcceptedSecureChat {
   secureChatId: string,
   publicKey: string
+}
+
+export interface ILocalSecureChat {
+  secureChatId: string,
+  user: IUser
+}
+
+export interface ILocalSecureMessage {
+  senderId: number,
+  message: string
 }

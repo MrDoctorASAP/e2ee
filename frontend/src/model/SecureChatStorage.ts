@@ -1,5 +1,5 @@
-import { IAuth } from "../api/types"
-import { exportPrivateKey, exportPublicKey, exportSecretKey, importPrivateKey, importPublicKey, importSecretKey } from "./Encryption"
+import { IAuth, ILocalSecureChat, ILocalSecureMessage, IUser } from "../api/types"
+import { calculateFingerprint, exportPrivateKey, exportPublicKey, exportSecretKey, importPrivateKey, importPublicKey, importSecretKey } from "./Encryption"
 
 export function clear() {
   localStorage.clear()
@@ -38,6 +38,11 @@ export async function loadPrivayeKey(secureChatId: string) {
   return await importPrivateKey(item)
 }
 
+export async function clearTemporaryKeys(secureChatId: string) {
+  localStorage.removeItem('PRIVATE_'+secureChatId)
+  localStorage.removeItem('PUBLIC_'+secureChatId)
+}
+
 export async function storeSecretKey(secureChatId: string, key: CryptoKey) {
   const item = await exportSecretKey(key)
   localStorage.setItem('SECRET_'+secureChatId, item)
@@ -49,4 +54,33 @@ export async function loadSecretKey(secureChatId: string) {
   return await importSecretKey(item)
 }
 
+export async function storeFingerprint(secureChatId: string, secretKey: CryptoKey, publicKey: CryptoKey) {
+  const fingerprint = await calculateFingerprint(secretKey, publicKey)
+  const hex = Buffer.from(fingerprint).toString('hex')
+  localStorage.setItem('FINGERPRINT_'+secureChatId, hex)
+}
 
+export function loadFingerprint(secureChatId: string, secretKey: CryptoKey, publicKey: CryptoKey) {
+  const hex = localStorage.getItem('FINGERPRINT_'+secureChatId) ?? ''
+  return new Uint8Array(Buffer.from(hex, 'hex'))
+}
+
+export function storeSecureChat(secureChatId: string, user: IUser) {
+  const chats = loadSecureChats()
+  localStorage.setItem('SECRET_CHATS', JSON.stringify(chats.concat([{secureChatId, user}])))
+}
+
+export function loadSecureChats() : ILocalSecureChat[] {
+  const chatsJson = localStorage.getItem('SECRET_CHATS')
+  return chatsJson ? JSON.parse(chatsJson) : []
+}
+
+export function addSecureChatMessages(secureChatId: string, messages: ILocalSecureMessage[]) {
+  const chatMessages = getSecureChatMessages(secureChatId)
+  localStorage.setItem('SECRET_MESSAGES_'+secureChatId, JSON.stringify(chatMessages.concat(messages)))
+}
+
+export function getSecureChatMessages(secureChatId: string) : ILocalSecureMessage[] {
+  const messagesJson = localStorage.getItem('SECRET_MESSAGES_'+secureChatId)
+  return messagesJson ? JSON.parse(messagesJson) : []
+}

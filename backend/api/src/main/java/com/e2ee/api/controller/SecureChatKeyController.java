@@ -1,11 +1,9 @@
 package com.e2ee.api.controller;
 
-import com.e2ee.api.controller.dto.secure.RecipientKeyDto;
-import com.e2ee.api.controller.dto.secure.AcceptedSecureChatDto;
-import com.e2ee.api.controller.dto.secure.SecureChatDto;
-import com.e2ee.api.controller.dto.secure.SecureChatIdDto;
-import com.e2ee.api.controller.dto.secure.SecureChatInviteDto;
+import com.e2ee.api.controller.dto.secure.*;
+import com.e2ee.api.repository.entities.Message;
 import com.e2ee.api.repository.entities.User;
+import com.e2ee.api.repository.entities.secure.SecureChatMessage;
 import com.e2ee.api.service.KeyExchangeService;
 import com.e2ee.api.service.UserAuthenticationService;
 import lombok.AllArgsConstructor;
@@ -41,10 +39,10 @@ public class SecureChatKeyController {
         keyExchangeService.accept(user, acceptedSecureChat);
     }
 
-    @PostMapping("/exchange")
-    public List<RecipientKeyDto> exchange(@RequestBody List<SecureChatIdDto> secureChatIds) {
+    @GetMapping("/exchange")
+    public List<RecipientKeyDto> exchange() {
         User user = authService.getAuthenticatedUser();
-        return keyExchangeService.exchange(user, secureChatIds);
+        return keyExchangeService.exchange(user);
     }
 
     @PostMapping("/complete")
@@ -53,8 +51,22 @@ public class SecureChatKeyController {
         keyExchangeService.complete(user, secureChatId);
     }
 
-    // send
-    // messages
-    // seen
+    @PostMapping("/send")
+    public void send(@RequestBody SecureChatMessageDto message) {
+        User user = authService.getAuthenticatedUser();
+        keyExchangeService.sendMessage(user, message);
+    }
+
+    @PostMapping("/messages")
+    public List<SecureChatMessage> getMessages(@RequestBody List<String> secureChatIds) {
+        User user = authService.getAuthenticatedUser();
+        return keyExchangeService.getMessages(user, secureChatIds);
+    }
+
+    @PostMapping("/seen")
+    public void seen(@RequestBody List<Long> ids) {
+        User user = authService.getAuthenticatedUser();
+        keyExchangeService.deleteMessages(user, ids);
+    }
 
 }

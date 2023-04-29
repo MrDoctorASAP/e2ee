@@ -11,18 +11,34 @@ export function toBase64(buffer: ArrayBuffer) {
 export function fromBase64(base64: string) {
   return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
 }
-
+/**
+ * Создаёт пару открытый/закрытый ключ для создания общего симмитричного ключа
+ * по протоколу Диффи — Хеллмана на эллиптических кривых.
+ * Каждый вызов метода возвращает уникальную пару.
+ * 
+ * ECDH (Elliptic Curve Diffie-Hellman) — это алгоритм согласования ключей.
+ * Это позволяет двум людям, у каждого из которых есть пара открытого и закрытого ключей ECDH,
+ * сгенерировать общий секрет: то есть секрет, которым они — и никто другой — не делятся.
+ * Затем они могут использовать этот общий секрет в качестве симметричного ключа для защиты своей связи.
+ */
 export async function generateKeyPair() : Promise<CryptoKeyPair> {
   return window.crypto.subtle.generateKey(
     {
-      name: "ECDH",
-      namedCurve: "P-384",
+      name: "ECDH", // Протокол Диффи — Хеллмана на эллиптических кривых
+      namedCurve: "P-384", // Вид кривой для генерации ключей
     },
-    true,
-    ["deriveKey"]
+    true, // Ключ может быть экспортирован
+    ["deriveKey"] // Назначение ключа - deriveKey (создание общего симметричного ключа)
   );
 }
 
+/**
+ * Вычисляет общий симметричный ключ, одинаковый для собеседников,
+ * для шифрования по алгоритму AES-GCM.
+ * @param privateKey Закрытый ключ пользователя
+ * @param publicKey Открытый ключ собеседника
+ * @returns Общий симметричный ключ 
+ */
 export async function deriveSecretKey(privateKey: CryptoKey,
                                       publicKey: CryptoKey): Promise<CryptoKey> {
   return window.crypto.subtle.deriveKey(
@@ -109,4 +125,16 @@ export async function decrypt(key: CryptoKey, message: IEncryptedMessage): Promi
     { name: "AES-GCM", iv: fromBase64(message.iv) }, key, fromBase64(message.message)
   );
   return decoder.decode(decrypted)
+}
+
+export async function sha256(data: Uint8Array) : Promise<Uint8Array> {
+  return new Uint8Array(await window.crypto.subtle.digest('SHA-256', data))
+}
+
+export async function calculateFingerprint(secretKey: CryptoKey, publicKey: CryptoKey) {
+  const secretRaw = new Uint8Array(await window.crypto.subtle.exportKey('raw', secretKey))
+  const publicRaw = new Uint8Array(await window.crypto.subtle.exportKey('raw', publicKey))
+  const secretHash = await sha256(secretRaw)
+  const publicHash = await sha256(publicRaw)
+  return new Uint8Array([...secretHash.subarray(0, 127), ...publicHash.subarray(128)])
 }
