@@ -83,7 +83,7 @@ body {
     position: absolute;
     overflow-y: scroll;
     width: 32%;
-    height: 100%;
+    height: calc(100% - 36px);
     border-right: 1px solid #0000000d;
     border-top: 1px solid #0000000d;
 }

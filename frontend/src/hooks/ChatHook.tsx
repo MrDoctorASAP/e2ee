@@ -4,20 +4,21 @@ import {IBatchChat, IShortMessage, IUser} from "../api/types";
 
 
 export function useChatList() {
-  const [chats, setChats] = useState(new ImmutableMap<number, IBatchChat>())
+  const [chats, setChats] = useState(new ImmutableMap<number|string, IBatchChat>())
   return {
-    setChats: (chats: IBatchChat[]) => {
-      setChats(new ImmutableMap(new Map(chats.map(chat => [chat.details.chatId, chat]))))
+    registerChats: (chats: IBatchChat[]) => {
+      const mapping: (c: IBatchChat) => [number|string, IBatchChat] = chat => [chat.details.chatId, chat]
+      setChats(existedChats => existedChats.setAll(chats.map(mapping)))
     },
     getChats: () => Array.from(chats.map.values()),
-    getChat: (chatId: number) => chats.get(chatId),
-    has: (chatId: number) => chats.has(chatId),
+    getChat: (chatId: number|string) => chats.get(chatId),
+    has: (chatId: number|string) => chats.has(chatId),
     addChat: (chat: IBatchChat) => {
       if (!chats.has(chat.details.chatId)) {
         setChats(chats => chats.set(chat.details.chatId, chat))
       }
     },
-    setLastMessage: (chatId: number, sender: IUser, message: IShortMessage) => {
+    setLastMessage: (chatId: number|string, sender: IUser, message: IShortMessage) => {
       setChats(chats => chats.modifyIfPresent(chatId, chat => {
         return {
           ...chat,
@@ -28,7 +29,7 @@ export function useChatList() {
         }
       }))
     },
-    modifyUnseen: (chatId: number, mapper: (n: number) => number) => {
+    modifyUnseen: (chatId: number|string, mapper: (n: number) => number) => {
       setChats(chats => chats.modifyIfPresent(chatId, chat => {
         return {
           ...chat,
@@ -39,7 +40,7 @@ export function useChatList() {
         }
       }))
     },
-    cleanUnseen: (chatId: number) => {
+    cleanUnseen: (chatId: number|string) => {
       setChats(chats => chats.modifyIfPresent(chatId, chat => {
         return {
           ...chat,
@@ -50,7 +51,7 @@ export function useChatList() {
         }
       }))
     },
-    incrementUnseen: (chatId: number) => {
+    incrementUnseen: (chatId: number|string) => {
       setChats(chats => chats.modifyIfPresent(chatId, chat => {
         return {
           ...chat,
@@ -60,15 +61,15 @@ export function useChatList() {
           }
         }
       }))
-    }
+    },
   }
 }
 
 export function useChatCache() {
-  const [messagesCache, setMessagesCache] = useState(new ImmutableMap<number, IShortMessage[]|null>())
-  const [membersCache, setMembersCache] = useState(new ImmutableMap<number, Map<number, IUser>>())
+  const [messagesCache, setMessagesCache] = useState(new ImmutableMap<number|string, IShortMessage[]|null>())
+  const [membersCache, setMembersCache] = useState(new ImmutableMap<number|string, Map<number, IUser>>())
   return {
-    getChat: (chatId: number) => {
+    getChat: (chatId: number|string) => {
       const messages = messagesCache.get(chatId)
       if (messages) {
         return {
@@ -78,14 +79,14 @@ export function useChatCache() {
       }
       return messages
     },
-    isLoading: (chatId: number) => messagesCache.get(chatId) === null,
-    isLoaded: (chatId: number) => messagesCache.get(chatId),
-    markChatLoading: (chatId: number) => setMessagesCache(messagesCache => messagesCache.set(chatId, null)),
-    setChat: (chatId: number, messages: IShortMessage[], members: Map<number, IUser>) => {
+    isLoading: (chatId: number|string) => messagesCache.get(chatId) === null,
+    isLoaded: (chatId: number|string) => messagesCache.get(chatId),
+    markChatLoading: (chatId: number|string) => setMessagesCache(messagesCache => messagesCache.set(chatId, null)),
+    setChat: (chatId: number|string, messages: IShortMessage[], members: Map<number, IUser>) => {
       setMessagesCache(messagesCache => messagesCache.set(chatId, messages))
       setMembersCache(membersCache => membersCache.set(chatId, members))
     },
-    addMessageToChat: (chatId: number, message: IShortMessage) => {
+    addMessageToChat: (chatId: number|string, message: IShortMessage) => {
       setMessagesCache(messagesCache => messagesCache.modifyIfPresent(chatId,
           messages => messages ? [...messages, message] : messages))
     }

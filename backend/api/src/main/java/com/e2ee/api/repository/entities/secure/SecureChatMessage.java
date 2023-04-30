@@ -21,13 +21,18 @@ public class SecureChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long senderId;
     private String secureChatId;
     private String message;
     private String iv;
+    private Long date;
 
-    public SecureChatMessage(String secureChatId, String message, String iv) {
+    public SecureChatMessage(Long senderId, String secureChatId, String message, String iv) {
+        this.senderId = senderId;
+        this.date = System.currentTimeMillis();
         this.secureChatId = secureChatId;
         this.message = message;
+        this.iv = iv;
     }
 
     @Override

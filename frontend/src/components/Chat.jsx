@@ -1,12 +1,16 @@
-import {MessageBox} from "react-chat-elements"
+import {MessageBox, SystemMessage} from "react-chat-elements"
+import { distinctMessages } from "../api/types";
 import LoadingPage from "../pages/LoadingPage";
 
-function Chat({userId, chat, ...props}) {
+function Chat({userId, chat, enable, ...props}) {
   if (chat === undefined) {
     return <></>
   }
   if (chat === null) {
     return <LoadingPage/>
+  }
+  if (!enable) {
+    return <SystemMessage text={'Waiting for key exchange'}/>
   }
   return chat.messages.map(message => {
     const pos = message.senderId !== userId ? 'left' : 'right'

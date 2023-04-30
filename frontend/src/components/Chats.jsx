@@ -1,4 +1,4 @@
-import {ChatList} from "react-chat-elements"
+import { ChatList } from "react-chat-elements"
 import "../styles/components/TextMessage.css"
 
 function compareChats(chat1, chat2) {
@@ -8,12 +8,18 @@ function compareChats(chat1, chat2) {
   return chat2.last ? 1 : (chat1.last ? -1 : 0)
 }
 
-function Chats({chats, onChatClick, ...props}) {
+function Chats({ chats, onChatClick, ...props }) {
   const sortedChats = [...chats].sort(compareChats)
   const dataSource = sortedChats.map(chat => {
-    const title = chat.details.personal ?
-      chat.personal.recipient.firstName + ' ' + chat.personal.recipient.lastName :
-      chat.group.chatName
+    
+    let title = ''
+    if (chat.secure) {
+      title = '🔒 ' + chat.personal.recipient.firstName + ' ' + chat.personal.recipient.lastName
+    } else if (chat.details.personal) {
+      title = chat.personal.recipient.firstName + ' ' + chat.personal.recipient.lastName
+    } else {
+      title = chat.group.chatName
+    }
     const subtitle = chat.last ?
       chat.last.sender.firstName + ': ' + chat.last.message.text :
       undefined

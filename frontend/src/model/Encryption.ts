@@ -11,6 +11,7 @@ export function toBase64(buffer: ArrayBuffer) {
 export function fromBase64(base64: string) {
   return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
 }
+
 /**
  * Создаёт пару открытый/закрытый ключ для создания общего симмитричного ключа
  * по протоколу Диффи — Хеллмана на эллиптических кривых.

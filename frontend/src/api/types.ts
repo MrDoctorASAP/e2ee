@@ -1,3 +1,5 @@
+import {decrypt} from "../model/Encryption";
+import {getSecureChatMessages, loadSecretKey} from "../model/SecureChatStorage";
 
 export interface IAuth {
   userId: number,
@@ -11,7 +13,7 @@ export interface IUserCredentials {
 }
 
 export interface IChatDetails {
-  chatId: number,
+  chatId: number|string,
   personal: boolean,
   unseen: number
 }
@@ -52,11 +54,16 @@ export interface IMessage {
   message: string
 }
 
+export interface ISecureChatDetails {
+
+}
+
 export interface IBatchChat {
   details: IChatDetails,
   group?: IGroupChatDetails,
   personal?: IPersonalChatDetails,
-  last?: ILastMessage
+  last?: ILastMessage,
+  secure?: ISecureChatDetails
 }
 
 export interface IBatchMessages {
@@ -108,7 +115,69 @@ export interface ILocalSecureChat {
   user: IUser
 }
 
-export interface ILocalSecureMessage {
-  senderId: number,
-  message: string
+export interface ISecureChatMessageToSend {
+  secureChatId: string,
+  message: string,
+  iv: string
 }
+
+export interface ISecureChatMessage {
+  id: number,
+  senderId: number, // TODO
+  secureChatId: string,
+  message: string,
+  date: number, // TODO
+  iv: string
+}
+
+export function groupMessages(messages: ISecureChatMessage[]) : Map<string, ISecureChatMessage[]> {
+  const mapping: (m: ISecureChatMessage) => [string, ISecureChatMessage[]] = message => {
+    return [message.secureChatId, messages.filter(msg => msg.secureChatId === message.secureChatId)]
+  }
+  return new Map<string, ISecureChatMessage[]>(messages.map(mapping))
+}
+
+export async function decryptMessage(message: ISecureChatMessage) : Promise<IShortMessage|undefined> {
+  const key = await loadSecretKey(message.secureChatId)
+  if (!key) return
+  const decrypted = await decrypt(key, message)
+  return {
+    text: decrypted,
+    date: message.date, // TODO
+    messageId: message.id,
+    senderId: message.senderId // TODO:
+  }
+}
+
+export async function decryptMessages(messages: ISecureChatMessage[]) : Promise<Map<string, IShortMessage[]>> {
+  const map = new Map<string, IShortMessage[]>()
+  for (let message of messages) {
+    const key = await loadSecretKey(message.secureChatId)
+    if (!key) continue
+    const decrypted = await decrypt(key, message)
+    map.set(message.secureChatId, (map.get(message.secureChatId) ?? []).concat([{
+      text: decrypted,
+      date: message.date, // TODO
+      messageId: message.id,
+      senderId: message.senderId // TODO:
+    }]))
+  }
+  return map
+}
+
+export function loadChatMessages(secureChatIds: string[]) : Map<string, IShortMessage[]> {
+  const map = new Map<string, IShortMessage[]>()
+  for (let secureChatId of secureChatIds) {
+    map.set(secureChatId, getSecureChatMessages(secureChatId))
+  }
+  return map
+}
+
+export function distinctMessages(messages: IShortMessage[]) : IShortMessage[] {
+  const distinct = new Map<number, IShortMessage>()
+  for (let message of messages) {
+    distinct.set(message.messageId, message)
+  }
+  return [...distinct.values()]
+}
+

@@ -9,11 +9,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SecureChatMessageDto {
+
     private String secureChatId;
     private String message;
     private String iv;
 
-    public SecureChatMessage toEntry() {
-        return new SecureChatMessage(secureChatId, message, iv);
+    public SecureChatMessage toEntry(Long senderId) {
+        return new SecureChatMessage(senderId, secureChatId, message, iv);
     }
+
 }

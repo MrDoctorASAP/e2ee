@@ -1,4 +1,17 @@
-import {IAcceptedSecureChat, IAuth, IBatchChat, IBatchMessages, IPersonalChat, IRecipientKey, ISecureChat, ISecureChatId, ISecureChatInvite, IUser, IUserCredentials} from "./types";
+import {
+  IAcceptedSecureChat,
+  IAuth,
+  IBatchChat,
+  IBatchMessages,
+  IPersonalChat,
+  IRecipientKey,
+  ISecureChat,
+  ISecureChatId,
+  ISecureChatInvite, ISecureChatMessage,
+  ISecureChatMessageToSend,
+  IUser,
+  IUserCredentials
+} from "./types";
 
 const apiHost = 'http://localhost:8080'
 
@@ -90,7 +103,7 @@ export async function invites(auth: IAuth): Promise<ISecureChatInvite[]> {
 }
 
 export async function accept(auth: IAuth, accept: IAcceptedSecureChat): Promise<void> {
-  post('/api/v1/secure/chat/accept', accept, auth)
+  await post('/api/v1/secure/chat/accept', accept, auth)
 }
 
 export async function exchange(auth: IAuth) : Promise<IRecipientKey[]> {
@@ -98,10 +111,23 @@ export async function exchange(auth: IAuth) : Promise<IRecipientKey[]> {
 }
 
 export async function complete(auth: IAuth, id: ISecureChatId) : Promise<void> {
-  post('/api/v1/secure/chat/complete', id, auth)
+  await post('/api/v1/secure/chat/complete', id, auth)
 }
 
 export async function profile(userId: number) : Promise<IUser> {
   return (await post('/api/v1/user/users', [userId]))[0]
+}
+
+export async function sendSecureMessage(auth: IAuth, message: ISecureChatMessageToSend) {
+  await post('/api/v1/secure/chat/send', message, auth)
+}
+
+export async function getSecureChatsMessages(auth: IAuth, chatIds: string[]) : Promise<ISecureChatMessage[]> {
+  return await post('/api/v1/secure/chat/messages', chatIds, auth)
+}
+
+export async function seenSecureChatMessages(auth: IAuth, messageIds: number[]) {
+  console.log('seen: ', messageIds)
+  await post('/api/v1/secure/chat/seen', messageIds, auth)
 }
 

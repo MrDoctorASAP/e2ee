@@ -38,6 +38,7 @@ public class KeyExchangeService {
 
     @Transactional
     public SecureChatIdDto initSecureChat(User user, SecureChatDto secureChat) {
+        log.info("initSecureChat: {}", secureChat);
         userService.checkExistsById(secureChat.getRecipientId());
         String secureChatId = idService.generateSecureChatId(user, secureChat);
         memberRepository.saveAll(List.of(
@@ -51,6 +52,8 @@ public class KeyExchangeService {
                 secureChatId,
                 secureChat.getPublicKey()
         ));
+
+        log.info("Create invite: {}", invite);
 
         messagingService.publish(getEventRecipient(user, secureChatId),
                 new SecureChatInviteDto(invite.getSecureChatId(),
@@ -97,7 +100,7 @@ public class KeyExchangeService {
 
     @Transactional
     public void sendMessage(User user, SecureChatMessageDto message) {
-        SecureChatMessage chatMessage = messageRepository.save(message.toEntry());
+        SecureChatMessage chatMessage = messageRepository.save(message.toEntry(user.getId()));
         messagingService.publish(getEventRecipient(user, message.getSecureChatId()), chatMessage);
     }
 
@@ -105,6 +108,7 @@ public class KeyExchangeService {
     public List<SecureChatMessage> getMessages(User user, List<String> chatIds) {
         return chatIds.stream()
                 .flatMap(chatId -> messageRepository.findAllBySecureChatId(chatId).stream())
+                .filter(message -> !message.getSenderId().equals(user.getId()))
                 .toList();
     }
 
@@ -119,7 +123,7 @@ public class KeyExchangeService {
                 .map(SecureChatMember::getUserId)
                 .filter(Predicate.not(user.getId()::equals))
                 .findFirst()
-                .get();
+                .orElseThrow(() -> new RuntimeException("Corrupt members"));
     }
 
 }

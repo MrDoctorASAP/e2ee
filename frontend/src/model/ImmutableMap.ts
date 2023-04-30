@@ -36,5 +36,11 @@ export default class ImmutableMap<K, V> {
     )
   }
 
+  setAll(entries: [K, V][]) {
+    return new ImmutableMap(
+      new Map(Array.from(this.map.entries()).concat(entries))
+    )
+  }
+
 }
 
