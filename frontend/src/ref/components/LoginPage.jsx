@@ -1,46 +1,61 @@
 import { useEffect, useState } from "react";
 import { loadAuth, storeAuth } from "../../model/SecureChatStorage";
-import { login } from "./api";
+import LoadingPage from "../../pages/LoadingPage";
+import {login} from "../../api/ChatApi";
 
-function LoginPage({ setAuth, setLoading, ...props }) {
+function LoginPage({ auth, setAuth, ...props }) {
+
+  // Состояние загрузки данных
+  const [loading, setLoading] = useState(true)
+
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
 
+  // При первой загрузке страницы,
+  // проверяем нет ли сохранённых данных о авторизованном пользователе
   useEffect(() => {
-    setLoading(true)
+
+    // Загружаем иформацию о авторизванном пользователе из локального хранилища
     const auth = loadAuth()
+    // Если таковая имеется, то устанавливаем
     if (auth) {
       setAuth(auth)
     }
+    // Данные загруженны
     setLoading(false)
-  }, [])
+  }, [auth, setAuth])
 
-  const onLogin = () => {
+  // Действия при подтвеждении входа в систему
+  const onLogin = async () => {
+    // Устанавливаем флаг загрузки данных
     setLoading(true)
-    fetch('http://localhost:8080/api/v1/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'Application/json',
-      },
-      body: JSON.stringify({ username, password })
-    })
-      .then(resp => resp.json())
-      .then(auth => {
-        setAuth(auth)
-        if (rememberMe) {
-          storeAuth(auth)
-        }
-      })
-      .then(e => setLoading(false))
-      .catch(err => {
-        console.log(err)
-        setAuth(null)
-        setLoading(false)
-      });
+
+    // Убираем данные пользвателя из полей ввода
     setUsername('')
     setPassword('')
+    // Посылаем запрос на сервер для авторизации
+    const auth = await login({username, password})
+    // Если данные успешно получены
+    if (auth) {
+      // Устанвливаем в состояние
+      setAuth(auth)
+      if (rememberMe) {
+        // Если поставлен флаг rememberMe
+        // Сохраняем данные о авторизации в локальное хранилище
+        storeAuth(auth)
+      }
+    }
+    // Данные загруженны
+    setLoading(false)
   }
+
+  // Если загружаются данные, показываеем страницу загрузки
+  if (loading) {
+    return <LoadingPage/>
+  }
+
+  // В противном случае показывем форму ввода логина/пароля
   return <div className="login-page">
     <p className="login-line"><input className="login-input"
       value={username}

@@ -18,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static com.e2ee.api.controller.dto.secure.SecureChatInviteDto.mapping;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -99,9 +97,10 @@ public class KeyExchangeService {
     }
 
     @Transactional
-    public void sendMessage(User user, SecureChatMessageDto message) {
+    public SecureChatMessage sendMessage(User user, SecureChatMessageDto message) {
         SecureChatMessage chatMessage = messageRepository.save(message.toEntry(user.getId()));
         messagingService.publish(getEventRecipient(user, message.getSecureChatId()), chatMessage);
+        return chatMessage;
     }
 
     @Transactional

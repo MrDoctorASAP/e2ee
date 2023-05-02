@@ -1,5 +1,5 @@
 import 'react-chat-elements/dist/main.css'
-import ChatApp from "./ChatApp";
+import ChatApp from "./ChatApp"
 
 function App() {
     return <ChatApp/>

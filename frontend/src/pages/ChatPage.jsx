@@ -14,28 +14,20 @@ import {
   profile,
   seen,
   seenSecureChatMessages,
-  sendMessage, sendSecureMessage
+  sendMessage,
+  sendSecureMessage
 } from "../api/ChatApi";
-import Chats from "../components/Chats";
-import Chat from "../components/Chat";
+import ChatListView from "../components/ChatListView";
 import '../ref/components/Styles.css'
-import { MessageInput } from "@minchat/react-chat-ui";
 import { useChatCache, useChatList } from "../hooks/ChatHook";
-import UserChoice from "../components/UserChoice";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import {
   addSecureChatMessages,
   clear,
   clearTemporaryKeys,
-  hasSecret,
   loadPrivateKey, loadSecretKey,
   loadSecureChats,
-  storeFingerprint,
   storePrivateKey,
   storePublicKey,
   storeSecretKey,
@@ -49,33 +41,18 @@ import {
   generateKeyPair,
   importPublicKey
 } from "../model/Encryption";
-import {decryptMessages, loadChatMessages} from "../api/types";
+import { decryptMessages, loadChatMessages } from "../api/types";
+import UserActions from "../components/UserActions";
+import Chat from "../components/Chat";
 
 function ChatPage({ auth, setAuth, ...props }) {
 
-  const [socketLoading, setSocketLoading] = useState(true)
   const [chatsLoading, setChatsLoading] = useState(true)
-
   const [user, setUser] = useState()
-
   const chatList = useChatList()
   const chatCache = useChatCache()
-
   const [currentChatId, setCurrentChatId] = useState(null)
-  const [showPersonal, setShowPersonal] = useState(false)
-  const [showSecure, setShowSecure] = useState(false)
-
   const chatEndRef = useRef(null)
-
-  useEffect(() => {
-    if (!auth) return
-    if (socketLoading) return
-    getChats(auth)
-      .then(chats => {
-        chatList.registerChats(chats)
-        setChatsLoading(false)
-      })
-  }, [auth, socketLoading])
 
   useEffect(() => {
 
@@ -105,7 +82,7 @@ function ChatPage({ auth, setAuth, ...props }) {
     const secret = await deriveSecretKey(privateKey, recipientPublicKey)
     await storeSecretKey(recipientKey.chatId, secret)
     // await storeFingerprint(recipientKey.chatId, recipientPublicKey, secret)
-    await complete(auth, {secureChatId: recipientKey.chatId})
+    await complete(auth, { secureChatId: recipientKey.chatId })
     await clearTemporaryKeys(recipientKey.chatId)
   }
 
@@ -117,19 +94,22 @@ function ChatPage({ auth, setAuth, ...props }) {
     // await storeFingerprint(invite.secureChatId, senderPublicKey, secret)
     const secureChat = storeSecureChat(invite.secureChatId, invite.sender)
     chatList.registerChats([{
-      details: {chatId: secureChat.secureChatId, personal: true, unseen: 0},
-      personal: {recipient: invite.sender},
+      details: { chatId: secureChat.secureChatId, personal: true, unseen: 0 },
+      personal: { recipient: invite.sender },
       secure: {}
     }])
     const members = new Map([[auth.userId, user], [secureChat.user.userId, secureChat.user]])
     chatCache.setChat(secureChat.secureChatId, [], members)
-    await accept(auth, {secureChatId: invite.secureChatId, publicKey: await exportPublicKey(keys.publicKey)})
+    await accept(auth, { secureChatId: invite.secureChatId, publicKey: await exportPublicKey(keys.publicKey) })
   }
 
   const onLoad = async () => {
 
     const user = await profile(auth.userId)
     setUser(user)
+
+    const chats = await getChats(auth)
+    chatList.registerChats(chats)
 
     const _invites = await invites(auth)
     for (const invite of _invites) {
@@ -145,6 +125,7 @@ function ChatPage({ auth, setAuth, ...props }) {
     const secureChatIds = secureChats.map(secureChat => secureChat.secureChatId)
     const newMessages = await getSecureChatsMessages(auth, secureChatIds)
     const newDecryptedMessages = await decryptMessages(newMessages)
+
     for (let [key, value] of newDecryptedMessages.entries()) {
       addSecureChatMessages(key, value)
     }
@@ -156,20 +137,18 @@ function ChatPage({ auth, setAuth, ...props }) {
       const members = new Map([[auth.userId, user], [secureChat.user.userId, secureChat.user]])
       chatCache.setChat(secureChat.secureChatId, chatMessages.get(secureChat.secureChatId) ?? [], members)
       return {
-        details: {chatId: secureChat.secureChatId, personal: true, unseen},
+        details: { chatId: secureChat.secureChatId, personal: true, unseen },
         personal: {
           recipient: secureChat.user
         },
         secure: {}
       }
     }))
-
-    seenSecureChatMessages(auth, newMessages.map(message => message.id))
+    await seenSecureChatMessages(auth, newMessages.map(message => message.id))
   }
 
   useEffect(() => {
     if (!auth) return
-    setChatsLoading(true)
     onLoad().then(() => setChatsLoading(false))
   }, [auth])
 
@@ -188,23 +167,20 @@ function ChatPage({ auth, setAuth, ...props }) {
     if (currentChatId !== chatId) {
       chatList.incrementUnseen(chatId)
     } else {
-      seen(auth, chatId)
+      seen(auth, chatId).then(() => { })
     }
     chatEndRef.current?.scrollIntoView()
   }
 
   const onChatCreate = (chatCreationEvent) => {
     if (chatCreationEvent.members.map(m => m.userId).find(id => id === auth.userId)) {
-      chatList.addChat(chatCreationEvent.chat)
+      chatList.registerChat(chatCreationEvent.chat)
     }
   }
 
   const onSecureChatMessage = async (message) => {
     const secret = await loadSecretKey(message.secureChatId)
-    const decryptedMessage = await decrypt(secret, {
-      message: message.message,
-      iv: message.iv
-    })
+    const decryptedMessage = await decrypt(secret, message)
     const messageObj = {
       messageId: message.id,
       text: decryptedMessage,
@@ -234,10 +210,6 @@ function ChatPage({ auth, setAuth, ...props }) {
         onSecureChatMessage(body.event)
       }
     }
-  }
-
-  const onSocketConnect = e => {
-    setSocketLoading(false)
   }
 
   const onChatClick = (chatId) => {
@@ -273,46 +245,24 @@ function ChatPage({ auth, setAuth, ...props }) {
     }
   }
 
-  const socket = <SockJsClient
-    url='http://localhost:8080/ws'
-    topics={['/topic/message', '/topic/chat', '/topic/invite', '/topic/exchange', '/topic/secureMessage']}
-    onMessage={onSocketMessage}
-    onConnect={onSocketConnect}
-    debug={true}
-  />
-
-  if (socketLoading || chatsLoading) {
+  if (chatsLoading) {
     return <>
-      {socket}
       <LoadingPage />
     </>
   }
 
-  const logout = () => {
+  const onLogout = () => {
     clear()
     setAuth(null)
   }
 
-  const currentChat = currentChatId ? chatList.getChat(currentChatId) : null
-
-  const currentChatName = currentChat ?
-    (currentChat.details.personal ?
-      currentChat.personal.recipient.firstName + ' ' + currentChat.personal.recipient.lastName :
-      currentChat.group.chatName)
-    : ''
-  
-  const enable = (currentChat && (!currentChat.secure || hasSecret(currentChatId) ))
-
-  const messageInput = enable ?
-    <MessageInput onSendMessage={onSendMessage} /> : undefined
+  const currentChatName = chatList.getChatName(currentChatId)
 
   const onCreatePersonalChat = (user) => {
-    setShowPersonal(false)
     createPersonalChat(auth, { userId: user.userId })
   }
 
   const onCreateSecureChat = async (user) => {
-    setShowSecure(false)
     const keys = await generateKeyPair()
     const publicKey = await exportPublicKey(keys.publicKey)
     const chatId = await createSecureChat(auth, { publicKey: publicKey, recipientId: user.userId })
@@ -320,77 +270,47 @@ function ChatPage({ auth, setAuth, ...props }) {
     await storePrivateKey(chatId.secureChatId, keys.privateKey)
     const secureChat = storeSecureChat(chatId.secureChatId, user)
     chatList.registerChats([{
-      details: {chatId: secureChat.secureChatId, personal: true, unseen: 0},
-      personal: {recipient: user},
+      details: { chatId: secureChat.secureChatId, personal: true, unseen: 0 },
+      personal: { recipient: user },
       secure: {}
     }])
     const members = new Map([[auth.userId, user], [secureChat.user.userId, secureChat.user]])
     chatCache.setChat(secureChat.secureChatId, [], members)
   }
 
-  // {"timestamp":"2023-04-27T16:17:51.337+00:00","status":404,"error":"Not Found","message":"No message available","path":"/api/v1/chat/create/personal"}
   return <div>
-    {socket}
+    <SockJsClient
+      url='http://localhost:8080/ws'
+      topics={[
+        '/topic/message', // Сообщения персональных и груповых чатов
+        '/topic/chat', // Создание чатов
+        '/topic/invite', // Приглашение в секретный чат
+        '/topic/exchange', // Обмен ключей секретного чата
+        '/topic/secureMessage' // Сообщение в общем чате
+      ]}
+      onMessage={onSocketMessage}
+      debug={true}
+    />
     <div className='middle'>
       <div className='middle-offset'>
-        {/* <div className="plus alt" onClick={e => setShowPersonal(true)}></div> */}
-        <div className="user-profile">
-          <NavDropdown
-            id="nav-dropdown-dark-example"
-            title={auth.username}
-            menuVariant="light"
-          >
-            <NavDropdown.Item onClick={e => setShowPersonal(true)}>
-              Create personal chat...
-            </NavDropdown.Item>
-            <NavDropdown.Item>
-              Create group chat...
-            </NavDropdown.Item>
-            <NavDropdown.Item onClick={e => setShowSecure(true)}>
-              Create secure chat...
-            </NavDropdown.Item>
-            <NavDropdown.Divider />
-            <NavDropdown.Item onClick={logout}>
-              Logout
-            </NavDropdown.Item>
-          </NavDropdown>
-        </div>
         <div className='chats-list'>
-          <Chats chats={chatList.getChats()} onChatClick={onChatClick} />
+          <ChatListView chats={chatList.getChats()} onChatClick={onChatClick} />
         </div>
         <div className='chat-header'>
           {currentChatName}
         </div>
-        <div className='current-chat'>
-          <Chat
-            enable={enable}
-            chat={chatCache.getChat(currentChatId)}
-            userId={auth.userId}
-          />
-          <div ref={chatEndRef}></div>
-        </div>
-        <div className='input-field-container'>
-          {messageInput}
-        </div>
+        <Chat chatEndRef={chatEndRef}
+          chat={chatList.getChat(currentChatId)}
+          chatDetails={chatCache.getChat(currentChatId)}
+          auth={auth}
+          onSendMessage={onSendMessage}
+        />
       </div>
+      <UserActions chatList={chatList} auth={auth} actions={{
+        onLogout, onCreateSecureChat, onCreatePersonalChat
+      }} />
     </div>
-    <UserChoice
-      show={showPersonal}
-      setShow={setShowPersonal}
-      onUserClick={onCreatePersonalChat}
-      exclude={
-        (chatList.getChats()
-          ?.filter(chat => chat.details.personal)
-          ?.map(chat => chat.personal.recipient.userId) ?? [])
-          .concat([auth.userId])
-      }
-    />
-    <UserChoice
-      show={showSecure}
-      setShow={setShowSecure}
-      onUserClick={onCreateSecureChat}
-      exclude={[auth.userId]}
-    />
+
   </div>
 }
 

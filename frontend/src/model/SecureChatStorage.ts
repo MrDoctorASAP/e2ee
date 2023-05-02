@@ -54,7 +54,7 @@ export async function loadSecretKey(secureChatId: string) {
   return await importSecretKey(item)
 }
 
-export function hasSecret(secureChatId: string) {
+export function hasSecret(secureChatId: string|number) {
   return localStorage.getItem('SECRET_'+secureChatId)
 }
 

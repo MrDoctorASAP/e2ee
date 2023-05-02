@@ -16,6 +16,7 @@ import {
 const apiHost = 'http://localhost:8080'
 
 class ApiRequestInit {
+
   method
   headers
   body
@@ -34,7 +35,7 @@ export async function request(method: string,
                               auth?: IAuth,
                               body?: any): Promise<any> {
   const url = apiHost + path;
-  return await fetch(url, new ApiRequestInit(method, auth, body))
+  return fetch(url, new ApiRequestInit(method, auth, body))
     .then(async resp => {
       if (resp.ok) {
         const text = await resp.text()
@@ -123,11 +124,12 @@ export async function sendSecureMessage(auth: IAuth, message: ISecureChatMessage
 }
 
 export async function getSecureChatsMessages(auth: IAuth, chatIds: string[]) : Promise<ISecureChatMessage[]> {
+  if (!chatIds) return []
   return await post('/api/v1/secure/chat/messages', chatIds, auth)
 }
 
 export async function seenSecureChatMessages(auth: IAuth, messageIds: number[]) {
-  console.log('seen: ', messageIds)
+  if (!messageIds) return
   await post('/api/v1/secure/chat/seen', messageIds, auth)
 }
 

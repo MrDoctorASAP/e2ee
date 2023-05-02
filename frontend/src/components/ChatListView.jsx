@@ -8,10 +8,9 @@ function compareChats(chat1, chat2) {
   return chat2.last ? 1 : (chat1.last ? -1 : 0)
 }
 
-function Chats({ chats, onChatClick, ...props }) {
+function ChatListView({ chats, onChatClick, ...props }) {
   const sortedChats = [...chats].sort(compareChats)
   const dataSource = sortedChats.map(chat => {
-    
     let title = ''
     if (chat.secure) {
       title = '🔒 ' + chat.personal.recipient.firstName + ' ' + chat.personal.recipient.lastName
@@ -44,4 +43,4 @@ function Chats({ chats, onChatClick, ...props }) {
   />
 }
 
-export default Chats
+export default ChatListView

@@ -52,9 +52,9 @@ public class SecureChatKeyController {
     }
 
     @PostMapping("/send")
-    public void send(@RequestBody SecureChatMessageDto message) {
+    public SecureChatMessage send(@RequestBody SecureChatMessageDto message) {
         User user = authService.getAuthenticatedUser();
-        keyExchangeService.sendMessage(user, message);
+        return keyExchangeService.sendMessage(user, message);
     }
 
     @PostMapping("/messages")

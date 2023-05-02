@@ -1,6 +1,8 @@
 import {decrypt} from "../model/Encryption";
 import {getSecureChatMessages, loadSecretKey} from "../model/SecureChatStorage";
 
+export type ChatId = string|number
+
 export interface IAuth {
   userId: number,
   username: string,
@@ -13,7 +15,7 @@ export interface IUserCredentials {
 }
 
 export interface IChatDetails {
-  chatId: number|string,
+  chatId: ChatId,
   personal: boolean,
   unseen: number
 }
@@ -123,10 +125,10 @@ export interface ISecureChatMessageToSend {
 
 export interface ISecureChatMessage {
   id: number,
-  senderId: number, // TODO
+  senderId: number,
   secureChatId: string,
   message: string,
-  date: number, // TODO
+  date: number,
   iv: string
 }
 
@@ -143,9 +145,9 @@ export async function decryptMessage(message: ISecureChatMessage) : Promise<ISho
   const decrypted = await decrypt(key, message)
   return {
     text: decrypted,
-    date: message.date, // TODO
+    date: message.date,
     messageId: message.id,
-    senderId: message.senderId // TODO:
+    senderId: message.senderId
   }
 }
 
@@ -157,9 +159,9 @@ export async function decryptMessages(messages: ISecureChatMessage[]) : Promise<
     const decrypted = await decrypt(key, message)
     map.set(message.secureChatId, (map.get(message.secureChatId) ?? []).concat([{
       text: decrypted,
-      date: message.date, // TODO
+      date: message.date,
       messageId: message.id,
-      senderId: message.senderId // TODO:
+      senderId: message.senderId
     }]))
   }
   return map

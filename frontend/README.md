@@ -1,70 +1,92 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Клиентская чать приложения 
 
-## Available Scripts
+Запуск:
 
-In the project directory, you can run:
+```
+npm install --legacy-peer-deps
+npm start
+```
 
-### `npm start`
+# Языкы
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* Html
+* CSS
+* JavaSript
+* TypeScript
+* JSX — расширение синтаксиса JavaScript для React
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+# Иструменты разработки
 
-### `npm test`
+* WebStorm - ide
+* VS Code - ide
+* Github - vcs
+* npm - package manager
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# Используемые библиотеки
 
-### `npm run build`
+Использованные зависимости указанны в `package.json`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## react-chat-elements
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+"react-chat-elements": "^12.0.8"
+```
 
-### `npm run eject`
+github: https://github.com/detaysoft/react-chat-elements
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Библиотека предоставляющаяя графические компоненты чата: Сообщения, аватарки, список чатов, ...
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## react-chat-ui
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+"@minchat/react-chat-ui": "^0.4.3"
+```
 
-## Learn More
+github: https://github.com/brandonmowat/react-chat-ui
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Поле ввода сообщений взято из этой библиотеки
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## bootstrap
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```
+"bootstrap": "^5.2.3",
+"react-bootstrap": "^2.7.4",
+```
+Свободный набор инструментов для создания сайтов и веб-приложений. Включает в себя HTML и CSS шаблоны оформления для типографики, веб форм, кнопок, меток, блоков навигации и прочих компонентов веб-интерфейса, включая JavaScript расширения. ([wiki](https://ru.wikipedia.org/wiki/Bootstrap_(%D1%84%D1%80%D0%B5%D0%B9%D0%BC%D0%B2%D0%BE%D1%80%D0%BA)))
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## typescript
 
-### Making a Progressive Web App
+```
+"typescript": "^5.0.4",
+"@types/jest": "^29.5.1",
+"@types/node": "^18.16.0",
+"@types/react": "^18.2.0",
+"@types/react-dom": "^18.2.0",
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## React
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```
+"react": "^18.2.0",
+"react-dom": "^18.2.0",
+"react-scripts": "5.0.1",
+"react-stomp": "^5.1.0",
+"web-vitals": "^2.1.4"
+```
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# Минимальные требования к клиенту
+Браузер:
+* Chrome 60
+* Firefox 55
+* Edge 79

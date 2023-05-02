@@ -4,16 +4,28 @@ import { IUser } from "../api/types";
 import { search } from "../api/ChatApi";
 
 interface IUserChoiceProps {
+
+  /** Действие при выборе пользователя */
   onUserClick: (u:IUser) => void,
+  
+  /** Видимость окна */
   show: boolean,
+
+  /** Установить видимость окна */
   setShow: (b: boolean) => void,
-  exclude: number[]
+
+  /** Идентификаторы пользователей, которые будут исключены из списка */
+  exclude: unknown[]
 }
 
+/**
+ * Окно выбора пользователя
+*/
 function UserChoice({onUserClick, show, setShow, exclude}: IUserChoiceProps) {
 
   const [query, setQuery] = useState<string>('')
   const [users, setUsers] = useState<IUser[]>([])
+
   useEffect(() => {
     if (query) {
       search(query).then(setUsers)
@@ -27,7 +39,9 @@ function UserChoice({onUserClick, show, setShow, exclude}: IUserChoiceProps) {
       setShow(false)
     }
   }
-  if (!show) return
+
+  if (!show) return <></>
+  
   return <div className="popup" onClick={e => onExit(e.target)}>
     <div className="user-choice-box">
       <input placeholder="search" className="user-choice-input" value={query}

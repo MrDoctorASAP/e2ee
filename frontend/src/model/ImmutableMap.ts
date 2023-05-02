@@ -1,4 +1,10 @@
 
+/**
+ * Декоратор для Map.
+ * Кадый раз при вставке/обновлении значений создаёт новый обьект, копируя все значения.
+ * Необходимость такого класса обусловленна политикой обновления состояний в React:
+ * При обновлении состояния необходимо передавать новый обьект.
+ * */
 export default class ImmutableMap<K, V> {
 
   map: Map<K, V>
@@ -40,6 +46,14 @@ export default class ImmutableMap<K, V> {
     return new ImmutableMap(
       new Map(Array.from(this.map.entries()).concat(entries))
     )
+  }
+
+  values() : IterableIterator<V> {
+    return this.map.values()
+  }
+
+  entries() : IterableIterator<[K, V]> {
+    return this.map.entries()
   }
 
 }

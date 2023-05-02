@@ -73,13 +73,13 @@ public class DevelopmentInit implements ApplicationRunner {
         User admin = userService.createUser(new UserRegistrationDto(
                 new UserCredentialsDto("admin", "admin"), "Admin", "42", ""));
         User user1 = userService.createUser(new UserRegistrationDto(
-                new UserCredentialsDto("user1", "password1"), "Уинстон", "Черчилль", ""));
+                new UserCredentialsDto("user1", "password1"), "Yunston", "Cherchil", ""));
         User user2 = userService.createUser(new UserRegistrationDto(
-                new UserCredentialsDto("user2", "password5"), "Мирон", "Янович", ""));
+                new UserCredentialsDto("user2", "password5"), "Oxxxy", "miron", ""));
         User user3 = userService.createUser(new UserRegistrationDto(
-                new UserCredentialsDto("user3", "password3"), "Медведь", "Бурый", ""));
+                new UserCredentialsDto("user3", "password3"), "Bear", "Polar", ""));
         User user4 = userService.createUser(new UserRegistrationDto(
-                new UserCredentialsDto("user4", "password4"), "Штирлиц", "", ""));
+                new UserCredentialsDto("user4", "password4"), "Shtirlitz", "", ""));
 
         Chat chat1 = chatService.createPersonalChat(admin, with(user4));
         messageService.sendMessage(admin, message(chat1, "Вместо привычного голубя в окно залетела голая сова."));
