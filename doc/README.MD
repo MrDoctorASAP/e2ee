@@ -139,6 +139,7 @@ https://ru.wikipedia.org/wiki/JSON_Web_Token
 Полная схема передачи сообщений описанна в файле [SecureMessage.pdf](https://github.com/MrDoctorASAP/e2ee/blob/main/doc/SecureMessage.pdf)
 
 На сервер передаётся:
+* Идентификатор секретного чата
 * Зашифрованное сообщение
 * Вектор иницилизации (IV) - Нужен для AES; Является публичной информацией.
 
