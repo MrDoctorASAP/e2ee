@@ -24,10 +24,13 @@ npm start
 * npm - package manager
 
 # Интерфейсы веб API
+
 Встроенные в браузер API использованные для разработки
 
 [Fetch API](https://developer.mozilla.org/ru/docs/Web/API/Fetch_API) - для запросов на сервер
+
 [Localstorage](https://developer.mozilla.org/ru/docs/Web/API/Window/localStorage) - для хранения данных зашифрованных чатов
+
 [SubtleCrypto](https://developer.mozilla.org/ru/docs/Web/API/SubtleCrypto) - для шифрования данных и генерации ключей
 
 # Используемые библиотеки
