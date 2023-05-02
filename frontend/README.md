@@ -8,7 +8,7 @@ npm install --legacy-peer-deps
 npm start
 ```
 
-# Языкы
+# Языки
 
 * Html
 * CSS
@@ -16,18 +16,32 @@ npm start
 * TypeScript
 * JSX — расширение синтаксиса JavaScript для React
 
-# Иструменты разработки
+# Инструменты разработки
 
 * WebStorm - ide
 * VS Code - ide
 * Github - vcs
 * npm - package manager
 
+# Интерфейсы веб API
+Встроенные в браузер API использованные для разработки
+
+[Fetch API](https://developer.mozilla.org/ru/docs/Web/API/Fetch_API) - для запросов на сервер
+[Localstorage](https://developer.mozilla.org/ru/docs/Web/API/Window/localStorage) - для хранения данных зашифрованных чатов
+[SubtleCrypto](https://developer.mozilla.org/ru/docs/Web/API/SubtleCrypto) - для шифрования данных и генерации ключей
+
 # Используемые библиотеки
 
 Использованные зависимости указанны в `package.json`
 
----
+## react-stomp
+```
+"react-stomp": "^5.1.0"
+```
+
+github: https://github.com/lahsivjar/react-stomp
+
+Библиотека для работы с WebSocket по протоколу Stomp
 
 ## react-chat-elements
 
@@ -39,8 +53,6 @@ github: https://github.com/detaysoft/react-chat-elements
 
 Библиотека предоставляющаяя графические компоненты чата: Сообщения, аватарки, список чатов, ...
 
----
-
 ## react-chat-ui
 
 ```
@@ -51,8 +63,6 @@ github: https://github.com/brandonmowat/react-chat-ui
 
 Поле ввода сообщений взято из этой библиотеки
 
----
-
 ## bootstrap
 
 ```
@@ -60,8 +70,6 @@ github: https://github.com/brandonmowat/react-chat-ui
 "react-bootstrap": "^2.7.4",
 ```
 Свободный набор инструментов для создания сайтов и веб-приложений. Включает в себя HTML и CSS шаблоны оформления для типографики, веб форм, кнопок, меток, блоков навигации и прочих компонентов веб-интерфейса, включая JavaScript расширения. ([wiki](https://ru.wikipedia.org/wiki/Bootstrap_(%D1%84%D1%80%D0%B5%D0%B9%D0%BC%D0%B2%D0%BE%D1%80%D0%BA)))
-
----
 
 ## typescript
 
@@ -72,8 +80,6 @@ github: https://github.com/brandonmowat/react-chat-ui
 "@types/react": "^18.2.0",
 "@types/react-dom": "^18.2.0",
 ```
-
----
 
 ## React
 
