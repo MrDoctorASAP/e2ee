@@ -29,7 +29,7 @@ npm start
 
 [Fetch API](https://developer.mozilla.org/ru/docs/Web/API/Fetch_API) - для запросов на сервер
 
-[Localstorage](https://developer.mozilla.org/ru/docs/Web/API/Window/localStorage) - для хранения данных зашифрованных чатов
+[LocalStorage](https://developer.mozilla.org/ru/docs/Web/API/Window/localStorage) - для хранения данных зашифрованных чатов
 
 [SubtleCrypto](https://developer.mozilla.org/ru/docs/Web/API/SubtleCrypto) - для шифрования данных и генерации ключей
 
@@ -90,7 +90,6 @@ github: https://github.com/brandonmowat/react-chat-ui
 "react": "^18.2.0",
 "react-dom": "^18.2.0",
 "react-scripts": "5.0.1",
-"react-stomp": "^5.1.0",
 "web-vitals": "^2.1.4"
 ```
 
