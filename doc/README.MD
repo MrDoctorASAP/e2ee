@@ -143,4 +143,259 @@ https://ru.wikipedia.org/wiki/JSON_Web_Token
 * Зашифрованное сообщение
 * Вектор иницилизации (IV) - Нужен для AES; Является публичной информацией.
 
+# Реализация
 
+### Base64
+
+Поскольку все криптографические алгоритмы работают с массивами байт, 
+а для передачи на сервер по HTTP необходимо использовать текст, 
+информация переводится из байтового представления в текстовый с помошью алгоритма BASE64.
+
+[Encryption.ts:7](https://github.com/MrDoctorASAP/e2ee/blob/main/frontend/src/model/Encryption.ts#L7)
+
+```ts
+// Преобразовывает массив байт в текст
+export function toBase64(buffer: ArrayBuffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+}
+```
+
+[Encryption.ts:11](https://github.com/MrDoctorASAP/e2ee/blob/main/frontend/src/model/Encryption.ts#L11)
+
+```ts
+// Преобразовывает текст в массив байт
+export function fromBase64(base64: string) {
+  return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
+}
+```
+
+Эта группа преобразований является однозначно обратимой, то есть:
+
+```ts
+toBase64(fromBase64(text)) === text
+fromBase64(toBase64(bytes)) === bytes
+```
+
+### Генерация пары открытый/закрытый ключ
+
+[Encryption.ts:25](https://github.com/MrDoctorASAP/e2ee/blob/main/frontend/src/model/Encryption.ts#L25)
+
+```ts
+/**
+ * Создаёт пару открытый/закрытый ключ для создания общего симмитричного ключа
+ * по протоколу Диффи — Хеллмана на эллиптических кривых.
+ * Каждый вызов метода возвращает уникальную пару.
+ * 
+ * ECDH (Elliptic Curve Diffie-Hellman) — это алгоритм согласования ключей.
+ * Это позволяет двум людям, у каждого из которых есть пара открытого и закрытого ключей ECDH,
+ * сгенерировать общий секрет: то есть секрет, которым они — и никто другой — не делятся.
+ * Затем они могут использовать этот общий секрет в качестве симметричного ключа для защиты своей связи.
+ */
+export async function generateKeyPair() : Promise<CryptoKeyPair> {
+  return window.crypto.subtle.generateKey(
+    {
+      name: "ECDH", // Протокол Диффи — Хеллмана на эллиптических кривых
+      namedCurve: "P-384", // Вид кривой для генерации ключей
+    },
+    true, // Ключ может быть экспортирован
+    ["deriveKey"] // Назначение ключа - deriveKey (создание общего симметричного ключа)
+  );
+}
+```
+
+### Экспорт и импорт ключей
+
+[CryptoKey](https://developer.mozilla.org/en-US/docs/Web/API/CryptoKey) и [CryptoKeyPair](https://developer.mozilla.org/ru/docs/Web/API/CryptoKeyPair) - являются обьектами ключей. 
+Ключи хранятся в некотором специальном виде и для получения их значения используются методы [export](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/exportKey) и [import](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey)
+
+* Export - преобразование CryptoKey к виду подходящему для передачи и хранения.
+* Import - преобразование экпротированного ключа к виду подходящему для использования в методах шифрования (CryptoKey)
+
+Экпортироваит можно только те ключи которые имеют свойство `extractable: true`
+
+Для экпорта ключей используются два предстваления: 
+* `raw` - массив байт
+* `jwk` - обьект содержащий значение ключа и метаинформацию
+
+`raw` используется для экпорта и импорта открытых ключей
+
+[Encryption.ts:60](https://github.com/MrDoctorASAP/e2ee/blob/main/frontend/src/model/Encryption.ts#L60)
+
+```ts
+// Экпорт открытого ключа в текстовый вид для передачи на сервер
+export async function exportPublicKey(key: CryptoKey): Promise<string> {
+  // Преобразование ключа в массив байт
+  const raw = await window.crypto.subtle.exportKey('raw', key)
+  // Преобразование массива байт в base64 текст
+  return toBase64(raw)
+}
+```
+
+Пример экпортированного публичного ключа, в таком виде он будет оправлен на сервер:
+
+```
+BIvzo8fOoOKRJ/RYg/8Jfs+Bi2GT4FKygfXYYSfq78rOYH9V8xcIOA3Lv6gRPyvUjAoAx6OYV+TcDZEAoIYssilVQlq01lLCn/yMUrUoo3f458nAfipewh6VZJ2ZA3NxD4U4xg== 
+```
+
+**Импорт публичного ключа**
+
+[Encryption.ts:65](https://github.com/MrDoctorASAP/e2ee/blob/main/frontend/src/model/Encryption.ts#L65)
+
+```ts
+export async function importPublicKey(raw: string): Promise<CryptoKey> {
+  // Преобразование массива текста в массив байт
+  const data = fromBase64(raw)
+  // Преобразование массива байт в ключ
+  return await window.crypto.subtle.importKey('raw', data,
+    {
+      name: "ECDH", // Для какого алгоритма будет использован ключ
+      namedCurve: "P-384", // Дополнительная информация о алгоритме - название эллиптической кривой
+    },
+    true, // Может ли ключ быть экспортирован
+    ["deriveKey"] // Назначение ключа - генерация общего секретно ключа
+  )
+}
+```
+
+**Экспорт приватного ключа**
+
+Приватный ключ должен быть экпортирован для хранения на клиенте (на сервер он передаватся не будет)
+
+```ts
+export async function exportPrivateKey(key: CryptoKey): Promise<string> {
+  // Преобразование ключа в объект, содержащий значение ключа и метаинформацию
+  const jwk = await window.crypto.subtle.exportKey('jwk', key)
+  // Преобразование объекта в json
+  return JSON.stringify(jwk)
+}
+```
+
+Пример экпортированного ключа:
+
+```json
+{
+  "crv":"P-384",
+  "d":"XxrgNoIklMznulWWBQgDkMbvqtjsCIj89ADRwLaC54lmMx3m2B23fRCmeUIxhd",
+  "ext":true,
+  "key_ops":["deriveKey"],
+  "kty":"EC",
+  "x":"LBlaEgLHB3R-NufY_xtiGZ3IMvWR-AT9nQJzWuolpxygfxCJDZzBgi0im5GtN2p7","y":"AxRwIso3TLy_lAJBG0JCEPxDKYCb0DkQpvYRFjrBVCVrOHLGIoMuTbkmzb1P-WLujd"
+}
+```
+
+**Импорт приватного ключа**
+
+```ts
+
+export async function importPrivateKey(raw: string): Promise<CryptoKey> {
+  // Преобразование из json в обьект
+  const jwk = JSON.parse(raw)
+  // Преобразование обьекта в ключ
+  return await window.crypto.subtle.importKey('jwk', jwk,
+    {
+      name: "ECDH",
+      namedCurve: "P-384",
+    },
+    true,
+    ["deriveKey"]
+  )
+}
+
+
+```
+
+**Экспорт и импорт секретного ключа**
+
+Аналогично приватному, отличие лишь в указанном алгоритме и назначении ключа
+
+```ts
+export async function exportSecretKey(key: CryptoKey): Promise<string> {
+  const jwk = await window.crypto.subtle.exportKey('jwk', key)
+  return JSON.stringify(jwk)
+}
+
+export async function importSecretKey(raw: string): Promise<CryptoKey> {
+  const jwk = JSON.parse(raw)
+  return await window.crypto.subtle.importKey('jwk', jwk,
+    {
+      name: "AES-GCM", // Ключ будет использован для AES
+      length: 256, // Длинна ключа
+    },
+    true,
+    ["encrypt", "decrypt"] // Назначение ключа для шифрования и дешифрования
+  )
+}
+
+```
+
+### Получение общего секретного ключа
+
+За получение общего ключа отвечет метод [deriveKey](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveKey)
+
+После обмена ключей каждый из собеседников имеет свою пару ключей открытый/закрытый и открытый ключ собеседника.
+Для создания общего ключа используется собственный приватный ключ и открытый ключ собеседника.
+
+```ts
+
+/**
+ * Вычисляет общий симметричный ключ, одинаковый для собеседников,
+ * для шифрования по алгоритму AES-GCM.
+ * @param privateKey Закрытый ключ пользователя
+ * @param publicKey Открытый ключ собеседника
+ * @returns Общий симметричный ключ 
+ */
+export async function deriveSecretKey(privateKey: CryptoKey, publicKey: CryptoKey): Promise<CryptoKey> {
+  return window.crypto.subtle.deriveKey(
+    {
+      name: "ECDH", // Проткол обмена ключей
+      public: publicKey, // Публичный ключ собеседника
+    },
+    privateKey, // Свой приватный ключ
+    {
+      name: "AES-GCM", // Назначение секретного ключа
+      length: 256, // Длинна ключа
+    },
+    true, // Может быть экпортирован
+    ["encrypt", "decrypt"] // назначение
+  );
+}
+```
+
+После создания общего ключа он может быть использован для шифрования:
+
+```ts
+
+export interface IEncryptedMessage {
+  message: string,
+  iv: string
+}
+
+export async function encrypt(key: CryptoKey, message: string): Promise<IEncryptedMessage> {
+  // Создание случайного вектора иницилизации 
+  const iv = window.crypto.getRandomValues(new Int8Array(12))
+  // Преобразование текта сообщения в массив байт через TextEncoder
+  const encoder = new TextEncoder()
+  const encodedText = encoder.encode(message);
+  // Шифрование массива байт
+  const encrypted = await window.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: iv },
+    key,
+    encodedText
+  );
+  // преобразование массива байт в тектовый вид через base64
+  return {message: toBase64(encrypted), iv: toBase64(iv)}
+}
+
+```
+
+**Дешифрование сообщения**
+
+```ts
+export async function decrypt(key: CryptoKey, message: IEncryptedMessage): Promise<string> {
+  const decoder = new TextDecoder()
+  const decrypted = await window.crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: fromBase64(message.iv) }, key, fromBase64(message.message)
+  );
+  return decoder.decode(decrypted)
+}
+```
