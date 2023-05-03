@@ -515,9 +515,11 @@ const onSendMessage = async (secureChatId, message) => {
 }
 ```
 
+### Получение сообщения
+
 ```ts
 
-const onSecureChatMessage = async (secureChatId, message) => {
+const onReciveMessage = async (secureChatId, message) => {
 
   // Загрузка секретного ключа из локального хранилища
   const secret = await loadSecretKey(secureChatId)
