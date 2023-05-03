@@ -399,3 +399,141 @@ export async function decrypt(key: CryptoKey, message: IEncryptedMessage): Promi
   return decoder.decode(decrypted)
 }
 ```
+
+# Реализация секретных чатов
+
+## Создание секретного чата (Алиса)
+
+```ts
+
+// Создание секретного чата с пользователем recipient
+const onCreateSecureChat = async (recipient) => {
+  
+  // Создание пары открытый/закрытый ключ
+  const keys = await generateKeyPair()
+  
+  // Экпорт публичного ключа
+  const publicKey = await exportPublicKey(keys.publicKey)
+  
+  // Запрос на сервер, в ответ получение уникального идентификатора чата
+  const secureChatId = await API.createSecureChat(auth, { publicKey, recipient.userId })
+
+  // Сохранение публичного и приватого ключа в локальное хранилище
+  await storePublicKey(secureChatId, keys.publicKey)
+  await storePrivateKey(secureChatId, keys.privateKey)
+
+  // Сохранение ифнормации о чате в локальное хранилище
+  const secureChat = storeSecureChat(secureChatId, recipient)
+
+  // Добавление чата в список
+  chatList.registerChat(secureChat)
+
+}
+```
+
+### Получение запроса на создание секретного чата (Боб)
+
+```ts
+
+// Получение приглащения в секретный чат
+const onInvite = async (invite) => {
+
+  // Импорт публичного ключа отправителя полученного из приглашения
+  const senderPublicKey = await importPublicKey(invite.publicKey)
+
+  // Создание пары открытый/закрытый ключ
+  const keys = await generateKeyPair()
+
+  // Создание общего секретного ключа
+  const secret = await deriveSecretKey(keys.privateKey, senderPublicKey)
+
+  // Сохранение секретного ключа в локальное хранилище
+  await storeSecretKey(invite.secureChatId, secret)
+
+  // Сохранение ифнормации о чате в локальное хранилище
+  const secureChat = storeSecureChat(invite.secureChatId, recipient)
+
+  // Добавление чата в список
+  chatList.registerChat(secureChat)
+  
+  // Запрос на сервер с подтверждением создания чата и передачей открытого ключа
+  await API.accept({ 
+    secureChatId: invite.secureChatId, 
+    publicKey: await exportPublicKey(keys.publicKey) 
+  })
+}
+
+```
+
+### Звершение обмена ключей (Алиса)
+
+```ts
+const onExchange = async (exchange) => {
+  
+  // Загрузить открытый/закрытый ключ из локального хранилища
+  const privateKey = await loadPrivateKey(exchange.secureChatId)
+  const publicKey = await loadPrivateKey(exchange.secureChatId)
+  
+  // Экпортировать открытый ключ собеседника полученный в ответе на приглашение
+  const recipientPublicKey = await importPublicKey(exchange.publicKey)
+  
+  // Создание общего секретного ключа
+  const secret = await deriveSecretKey(privateKey, recipientPublicKey)
+
+  // Сохранение секретного ключа в локальное хранилище
+  await storeSecretKey(exchange.secureChatId, secret)
+
+  // Послать запрос на сервер для подтверждения создания секретного чата
+  await API.complete(auth, { exchange.secureChatId })
+
+  // Удалить из локального хранилища открытый/закрытый ключ (Больше они не понадобятся)
+  await clearTemporaryKeys(recipientKey.chatId)
+
+}
+```
+
+### Отправка сообщения в секретный чат
+
+```ts
+const onSendMessage = async (secureChatId, message) => {
+  
+  // Загрузка секретного ключа из локального хранилища
+  const secret = await loadSecretKey(secureChatId)
+  
+  // Шифрование сообщения
+  const ecryptedMessage = await encrypt(secret, message)
+  
+  // Отправка зашифрованного сообщения на сервер
+  await API.sendSecureMessage(auth, {secureChatId, ecryptedMessage})
+  
+  // Добавление сообщения в чат
+  chatCache.addMessageToChat(secureChatId, message)
+  
+  // Сохранение сообщения в локальное хранилище
+  storeSecureChatMessage(secureChatId, message)
+
+}
+```
+
+```ts
+
+const onSecureChatMessage = async (secureChatId, message) => {
+
+  // Загрузка секретного ключа из локального хранилища
+  const secret = await loadSecretKey(secureChatId)
+
+  // Дешифрование сообщения
+  const decryptedMessage = await decrypt(secret, message)
+
+  // Добавление сообщения в чат
+  chatCache.addMessageToChat(secureChatId, decryptedMessage)
+
+  // Сохранение сообщения в локальное хранилище
+  storeSecureChatMessage(secureChatId, decryptedMessage)
+
+  // Подтверждение получения сообщения
+  await API.seenSecureChatMessage(auth, message.id)
+}
+
+```
+
