@@ -46,13 +46,19 @@ function UserActions({auth, chatList, actions}: IUserActionsProps) {
   <UserChoice
       show={showPersonal}
       setShow={setShowPersonal}
-      onUserClick={actions.onCreatePersonalChat}
+      onUserClick={user => {
+        setShowPersonal(false)
+        actions.onCreatePersonalChat(user)
+      }}
       exclude={ chatList.getPersonalChats().map(chat => chat.personal?.recipient.userId).concat([auth.userId]) }
     />
     <UserChoice
       show={showSecure}
       setShow={setShowSecure}
-      onUserClick={actions.onCreateSecureChat}
+      onUserClick={user => {
+        setShowSecure(false)
+        actions.onCreateSecureChat(user)
+      }}
       exclude={[auth.userId]}
     />
   </>

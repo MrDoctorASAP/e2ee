@@ -70,7 +70,7 @@ export async function importPublicKey(raw: string): Promise<CryptoKey> {
       namedCurve: "P-384",
     },
     true,
-    ["deriveKey"]
+    []
   )
 }
 
