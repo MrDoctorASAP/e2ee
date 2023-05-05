@@ -64,7 +64,9 @@ public class ChatService {
                 .name(groupChat.getName())
                 .ownerId(user.getId())
                 .build();
+
         groupChatInfo = infoRepository.save(groupChatInfo);
+
         List<ChatMember> chatMembers = memberRepository.saveAll(
                 userIds.stream()
                         .map(ChatMember.mapping(save.getId()))

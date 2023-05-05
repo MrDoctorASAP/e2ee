@@ -26,8 +26,9 @@ import {
   addSecureChatMessages,
   clear,
   clearTemporaryKeys,
-  loadPrivateKey, loadSecretKey,
+  loadPrivateKey, loadPublicKey, loadSecretKey,
   loadSecureChats,
+  storeFingerprint,
   storePrivateKey,
   storePublicKey,
   storeSecretKey,
@@ -44,6 +45,7 @@ import {
 import { decryptMessages, loadChatMessages } from "../api/types";
 import UserActions from "../components/UserActions";
 import Chat from "../components/Chat";
+import FingerpringHolder from "../components/FingerpringHolder";
 
 function ChatPage({ auth, setAuth, ...props }) {
 
@@ -53,6 +55,7 @@ function ChatPage({ auth, setAuth, ...props }) {
   const chatCache = useChatCache()
   const [currentChatId, setCurrentChatId] = useState(null)
   const chatEndRef = useRef(null)
+  const [showFingerprint, setShowFingerprint] = useState(false)
 
   useEffect(() => {
 
@@ -76,12 +79,12 @@ function ChatPage({ auth, setAuth, ...props }) {
 
   const onExchange = async (recipientKey) => {
     const privateKey = await loadPrivateKey(recipientKey.chatId)
-    const publicKey = await loadPrivateKey(recipientKey.chatId)
+    const publicKey = await loadPublicKey(recipientKey.chatId)
     if (!privateKey || !publicKey) return
     const recipientPublicKey = await importPublicKey(recipientKey.publicKey)
     const secret = await deriveSecretKey(privateKey, recipientPublicKey)
     await storeSecretKey(recipientKey.chatId, secret)
-    // await storeFingerprint(recipientKey.chatId, recipientPublicKey, secret)
+    await storeFingerprint(recipientKey.chatId, publicKey, secret)
     await complete(auth, { secureChatId: recipientKey.chatId })
     await clearTemporaryKeys(recipientKey.chatId)
   }
@@ -91,7 +94,7 @@ function ChatPage({ auth, setAuth, ...props }) {
     const keys = await generateKeyPair()
     const secret = await deriveSecretKey(keys.privateKey, senderPublicKey)
     await storeSecretKey(invite.secureChatId, secret)
-    // await storeFingerprint(invite.secureChatId, senderPublicKey, secret)
+    await storeFingerprint(invite.secureChatId, senderPublicKey, secret)
     const secureChat = storeSecureChat(invite.secureChatId, invite.sender)
     chatList.registerChats([{
       details: { chatId: secureChat.secureChatId, personal: true, unseen: 0 },
@@ -256,6 +259,7 @@ function ChatPage({ auth, setAuth, ...props }) {
     setAuth(null)
   }
 
+  const currentChat = chatList.getChat(currentChatId)
   const currentChatName = chatList.getChatName(currentChatId)
 
   const onCreatePersonalChat = (user) => {
@@ -297,7 +301,8 @@ function ChatPage({ auth, setAuth, ...props }) {
           <ChatListView chats={chatList.getChats()} onChatClick={onChatClick} />
         </div>
         <div className='chat-header'>
-          {currentChatName}
+        {currentChat?.secure && <span className="chat-secure-fingerprint" onClick={e => setShowFingerprint(true)}>🔒</span>}
+          <span>{currentChatName}</span>
         </div>
         <Chat chatEndRef={chatEndRef}
           chat={chatList.getChat(currentChatId)}
@@ -306,6 +311,7 @@ function ChatPage({ auth, setAuth, ...props }) {
           onSendMessage={onSendMessage}
         />
       </div>
+      <FingerpringHolder secureChatId={currentChatId} show={showFingerprint} setShow={setShowFingerprint}/>
       <UserActions chatList={chatList} auth={auth} actions={{
         onLogout, onCreateSecureChat, onCreatePersonalChat
       }} />

@@ -1,5 +1,5 @@
 import {IAuth, ILocalSecureChat, IShortMessage, IUser} from "../api/types"
-import { calculateFingerprint, exportPrivateKey, exportPublicKey, exportSecretKey, importPrivateKey, importPublicKey, importSecretKey } from "./Encryption"
+import { calculateFingerprint, exportPrivateKey, exportPublicKey, exportSecretKey, fromBase64, importPrivateKey, importPublicKey, importSecretKey, toBase64 } from "./Encryption"
 
 export function clear() {
   localStorage.clear()
@@ -60,13 +60,13 @@ export function hasSecret(secureChatId: string|number) {
 
 export async function storeFingerprint(secureChatId: string, secretKey: CryptoKey, publicKey: CryptoKey) {
   const fingerprint = await calculateFingerprint(secretKey, publicKey)
-  const hex = Buffer.from(fingerprint).toString('hex')
+  const hex = toBase64(fingerprint)
   localStorage.setItem('FINGERPRINT_'+secureChatId, hex)
 }
 
-export function loadFingerprint(secureChatId: string, secretKey: CryptoKey, publicKey: CryptoKey) {
+export function loadFingerprint(secureChatId: string) {
   const hex = localStorage.getItem('FINGERPRINT_'+secureChatId) ?? ''
-  return new Uint8Array(Buffer.from(hex, 'hex'))
+  return fromBase64(hex)
 }
 
 export function storeSecureChat(secureChatId: string, user: IUser) {

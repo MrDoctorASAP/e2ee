@@ -213,3 +213,48 @@ body {
     font-size: 18px;
     border: none;
 }
+
+.fingerprint-hex {
+    font-family: monospace;
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    padding-top: 4px;
+}
+
+.fingerprint-row {
+    padding: 0;
+    margin: 0;
+}
+
+.chat-secure-fingerprint {
+    cursor: pointer;
+}
+
+.fingerprint-box {
+    overflow-y: scroll;
+    background-color: white;
+    position: relative;
+    margin: auto;
+    margin-top: 10vh;
+    height: calc(85vh - 48px);
+    width: 400px;
+    padding: 24px;
+    border-radius: 8px;
+}
+
+.fingerprint-inner-box {
+    width: fit-content;
+    margin: auto;
+}
+
+.fingerprint-title {
+    text-align: center;
+    font-weight: bold;
+}
+
+.fingerprint-text {
+    text-align: center;
+    margin-bottom: 4px;
+}

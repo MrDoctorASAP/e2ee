@@ -18,6 +18,11 @@ public class ShortMessage {
     private Long date;
 
     public static Function<Message, ShortMessage> mapping() {
-        return message -> new ShortMessage(message.getId(), message.getUserId(), message.getMessage(), message.getDate());
+        return message -> new ShortMessage(
+                message.getId(),
+                message.getUserId(),
+                message.getMessage(),
+                message.getDate()
+        );
     }
 }

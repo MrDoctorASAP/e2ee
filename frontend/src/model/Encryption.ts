@@ -133,9 +133,16 @@ export async function sha256(data: Uint8Array) : Promise<Uint8Array> {
 }
 
 export async function calculateFingerprint(secretKey: CryptoKey, publicKey: CryptoKey) {
+  console.log('calculateFingerprint')
+  console.log(secretKey)
   const secretRaw = new Uint8Array(await window.crypto.subtle.exportKey('raw', secretKey))
+  console.log(secretRaw)
+  console.log(publicKey)
   const publicRaw = new Uint8Array(await window.crypto.subtle.exportKey('raw', publicKey))
+  console.log(publicRaw)
   const secretHash = await sha256(secretRaw)
+  console.log(secretHash)
   const publicHash = await sha256(publicRaw)
-  return new Uint8Array([...secretHash.subarray(0, 127), ...publicHash.subarray(128)])
+  console.log(publicHash)
+  return new Uint8Array([...secretHash, ...publicHash])
 }

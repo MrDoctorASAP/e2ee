@@ -70,9 +70,9 @@ export class ChatListModel {
     const currentChat = this.getChat(chatId)
     if (currentChat) {
       if (currentChat.secure) {
-        return '🔒 ' + currentChat.personal?.recipient.firstName + ' ' + currentChat.personal?.recipient.lastName
-      } else if (currentChat.details.personal) {
         return currentChat.personal?.recipient.firstName + ' ' + currentChat.personal?.recipient.lastName
+      } else if (currentChat.details.personal) {
+        return ' ' + currentChat.personal?.recipient.firstName + ' ' + currentChat.personal?.recipient.lastName
       }
       return currentChat.group?.chatName
     }
