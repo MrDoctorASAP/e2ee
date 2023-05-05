@@ -14,12 +14,16 @@ function Fingerprint({fingerprint}) {
   }
 
   const view = []
+  const hue = fingerprint[0] ^ fingerprint[32]
   for (let i = 0; i < 8; i++) {
     const row = []
     for (let j = 0; j < 8; j++) {
       let hex = fingerprint[i*8+j].toString(16)
       if (hex.length === 1) hex = '0' + hex
-      let background = "rgb(" + (fingerprint[i*8+j]/2+64) + ", " + (fingerprint[i*8+j]/2+64) + ", 255)"
+      const value = fingerprint[i*8+j]
+      const saturation = 75
+      const lightness = Math.floor(value/51) * 8 + 40
+      let background = "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)"
       row.push(<span
         key={j} 
         className="fingerprint-hex" 
