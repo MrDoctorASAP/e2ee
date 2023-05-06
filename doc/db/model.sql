@@ -14,7 +14,7 @@ CREATE TABLE user_credentials (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL REFERENCES user_details(id),
   username VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(1024) NOT NULL
+  password TEXT NOT NULL
 );
 
 CREATE TABLE chat(
