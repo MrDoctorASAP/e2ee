@@ -4,17 +4,17 @@ CREATE TYPE MESSAGE_KIND AS ENUM('plain', 'secure');
 
 CREATE TABLE user_details (
   id BIGSERIAL PRIMARY KEY,
-  username VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(1024) NOT NULL
-);
-
-CREATE TABLE user_profile (
-  id BIGSERIAL PRIMARY KEY,
-  user_id BIGINT NOT NULL REFERENCES user_details(id),
   first_name VARCHAR(255) NOT NULL,
   last_name VARCHAR(255) NOT NULL,
   email VARCHAR(255),
   info VARCHAR(255)
+);
+
+CREATE TABLE user_credentials (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES user_details(id),
+  username VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(1024) NOT NULL
 );
 
 CREATE TABLE chat(
