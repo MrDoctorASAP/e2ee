@@ -1,0 +1,16 @@
+server:
+  ssl:
+    key-store: classpath:e2ee.p12
+    key-store-password: 123456
+    key-store-type: pkcs12
+    key-alias: 1
+    key-password: 123456
+  port: 3000
+
+logging:
+  file:
+    name: "logs.log"
+
+spring:
+  main:
+    banner-mode: off

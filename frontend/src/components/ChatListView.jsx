@@ -23,8 +23,8 @@ function ChatListView({ chats, onChatClick, ...props }) {
       chat.last.sender.firstName + ': ' + chat.last.message.text :
       undefined
     const avatar = chat.details.personal ?
-      'http://localhost:8080/api/v1/avatar/user/' + chat.personal.recipient.userId :
-      'http://localhost:8080/api/v1/avatar/chat/' + chat.details.chatId
+      'https://localhost:8080/api/v1/avatar/user/' + chat.personal.recipient.userId :
+      'https://localhost:8080/api/v1/avatar/chat/' + chat.details.chatId
     const date = chat.last ? new Date(chat.last.message.date) : undefined
     return {
       id: chat.details.chatId,

@@ -31,7 +31,7 @@ function Chat({ auth, currectChatId, ...props }) {
             }
             return <MessageBox
               position={pos}
-              avatar={'http://localhost:8080/api/v1/user/avatar?userId=' + message.sender.userId}
+              avatar={'https://localhost:8080/api/v1/user/avatar?userId=' + message.sender.userId}
               type={'text'}
               title={message.sender.firstName + ' ' + message.sender.lastName}
               text={message.message.message}

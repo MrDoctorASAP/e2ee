@@ -284,7 +284,7 @@ function ChatPage({ auth, setAuth, ...props }) {
 
   return <div>
     <SockJsClient
-      url='http://localhost:8080/ws'
+      url='https://localhost:8080/ws'
       topics={[
         '/topic/message', // Сообщения персональных и груповых чатов
         '/topic/chat', // Создание чатов

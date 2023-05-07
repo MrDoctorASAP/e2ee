@@ -13,7 +13,7 @@ import {
   IUserCredentials
 } from "./types";
 
-const apiHost = 'http://localhost:8080'
+const apiHost = 'https://localhost:8080'
 
 class ApiRequestInit {
 

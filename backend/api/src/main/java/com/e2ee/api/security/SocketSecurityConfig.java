@@ -23,7 +23,7 @@ public class SocketSecurityConfig extends AbstractSecurityWebSocketMessageBroker
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOrigins("https://localhost:3000")
                 .withSockJS();
     }
 
