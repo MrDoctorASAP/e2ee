@@ -10,7 +10,8 @@ import {
   ISecureChatInvite, ISecureChatMessage,
   ISecureChatMessageToSend,
   IUser,
-  IUserCredentials
+  IUserCredentials,
+  IUserRegistration
 } from "./types";
 
 const apiHost = 'https://localhost:8080'
@@ -65,6 +66,10 @@ export async function post(
 
 export async function login(userCredentials: IUserCredentials): Promise<IAuth|null> {
   return await post('/api/v1/auth/login', userCredentials)
+}
+
+export async function register(userRegistration: IUserRegistration): Promise<IAuth|null> {
+  return await post('/api/v1/auth/register', userRegistration)
 }
 
 export async function getChats(auth: IAuth): Promise<IBatchChat[]|null> {

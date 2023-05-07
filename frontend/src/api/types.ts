@@ -14,6 +14,14 @@ export interface IUserCredentials {
   password: string
 }
 
+export interface IUserRegistration {
+  firstName: string,
+  lastName: string,
+  email: string,
+  username: string,
+  password: string
+}
+
 export interface IChatDetails {
   chatId: ChatId,
   personal: boolean,
