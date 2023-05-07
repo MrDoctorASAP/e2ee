@@ -68,7 +68,7 @@ body {
 }
 
 .current-chat {
-    overflow-y: scroll;
+    overflow-y: auto;
     position: absolute;
     right: 0;
     top: 36px;
@@ -81,7 +81,7 @@ body {
 .chats-list {
     top: 36px;
     position: absolute;
-    overflow-y: scroll;
+    overflow-y: auto;
     width: 32%;
     height: calc(100% - 36px);
     border-right: 1px solid #0000000d;
@@ -114,7 +114,7 @@ body {
 }
 
 .user-choice-box {
-    overflow-y: scroll;
+    overflow-y: auto;
     background-color: white;
     position: relative;
     margin: auto;
@@ -233,7 +233,7 @@ body {
 }
 
 .fingerprint-box {
-    overflow-y: scroll;
+    overflow-y: auto;
     background-color: white;
     position: relative;
     margin: auto;

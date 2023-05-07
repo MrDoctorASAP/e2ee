@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { loadAuth, storeAuth } from "../../model/SecureChatStorage";
-import LoadingPage from "../../pages/LoadingPage";
-import {login} from "../../api/ChatApi";
+import { loadAuth, storeAuth } from "../model/SecureChatStorage";
+import LoadingPage from "./LoadingPage";
+import {login} from "../api/ChatApi";
 
 function LoginPage({ auth, setAuth, ...props }) {
 

@@ -18,7 +18,7 @@ import {
   sendSecureMessage
 } from "../api/ChatApi";
 import ChatListView from "../components/ChatListView";
-import '../ref/components/Styles.css'
+import '../styles/Styles.css'
 import { useChatCache, useChatList } from "../hooks/ChatHook";
 
 import 'bootstrap/dist/css/bootstrap.min.css';

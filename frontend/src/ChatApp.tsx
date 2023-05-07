@@ -1,6 +1,6 @@
 import {useState} from "react";
 import ChatPage from "./pages/ChatPage";
-import LoginPage from "./ref/components/LoginPage";
+import LoginPage from "./pages/LoginPage";
 import {IAuth} from "./api/types";
 
 function ChatApp() {
