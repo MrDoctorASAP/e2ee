@@ -8,13 +8,13 @@ e2ee messenger
 Запустить серверную часть:
 
 ```
-backend/api/mvnw.cmd spring-boot:run
+.\backend\api\mvnw.cmd spring-boot:run
 ```
 
 Запустить клиентскую часть:
 
 ```
-frontend/server/mvnw.cmd spring-boot:run
+.\frontend\server\mvnw.cmd spring-boot:run
 ```
 
 Открыть в браузере [https://localhost:3000](https://localhost:3000/)
