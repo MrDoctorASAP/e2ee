@@ -1,11 +1,11 @@
 
-CREATE TYPE CHAT_KIND AS ENUM ('personal', 'secure', 'group')
-CREATE TYPE MESSAGE_KIND AS ENUM('plain', 'secure')
+CREATE TYPE CHAT_KIND AS ENUM ('personal', 'secure', 'group');
+CREATE TYPE MESSAGE_KIND AS ENUM('plain', 'secure');
 
 CREATE TABLE user_details (
   id BIGSERIAL PRIMARY KEY,
   username VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(1024) NOT NULL
+  password TEXT NOT NULL
 );
 
 CREATE TABLE user_profile (
@@ -63,7 +63,7 @@ CREATE TABLE message_event(
 
 CREATE TABLE secure_chat_invite(
   id BIGSERIAL PRIMARY KEY,
-  secure_id BIGINT NOT NULL REFERENCES secure_chat(secure_id),
+  secure_id TEXT NOT NULL REFERENCES secure_chat(secure_id),
   sender_id BIGINT NOT NULL REFERENCES user_details(id),
   recipient_id BIGINT NOT NULL REFERENCES user_details(id),
   public_key TEXT NOT NULL
@@ -71,7 +71,7 @@ CREATE TABLE secure_chat_invite(
 
 CREATE TABLE secure_chat_accept(
   id BIGSERIAL PRIMARY KEY,
-  secure_id BIGINT NOT NULL REFERENCES secure_chat(secure_id),
+  secure_id TEXT NOT NULL REFERENCES secure_chat(secure_id),
   public_key TEXT NOT NULL
 );
 
