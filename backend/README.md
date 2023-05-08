@@ -21,7 +21,7 @@ openssl req -new -nodes -newkey rsa:2048 -keyout e2ee.key -out e2ee.csr \
 ```
 
 ```
-openssl x509 -req -sha256 -days 1024 -in e2ee.csr -CA RootCA.pem -CAkey RootCA.key \
+openssl x509 -req -sha256 -days 365 -in e2ee.csr -CA RootCA.pem -CAkey RootCA.key \
     -CAcreateserial -extfile domains.ext -out e2ee.crt
 ```
 
