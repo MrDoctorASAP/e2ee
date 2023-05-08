@@ -4,8 +4,7 @@
 Запуск:
 
 ```
-npm install --legacy-peer-deps
-npm start
+.\server\mvnw.cmd spring-boot:run
 ```
 
 # Языки
