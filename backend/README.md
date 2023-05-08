@@ -74,3 +74,80 @@ Access-Control-Max-Age: 10
 X-Frame-Options: SAMEORIGIN
 ```
 
+# Тестирование
+
+Написанны unit тесты, которые тестируют отдельные компоненты системы:
+* Создание пользователя
+* Создание личного чата
+* Создание групового чата
+* Создание секретного чата
+* Обмен ключей для секретного чата
+* Отправка сообщения
+
+Пример unit-теста:
+
+```java
+
+// Тестирование создания личного чата
+@Test
+void createPersonalChat() {
+
+    // Создание тестовых пользователей
+    User user1 = testSupport.createTestUser();
+    User user2 = testSupport.createTestUser();
+
+    // Вызов тестируемого метода
+    Chat chat = chatService.createPersonalChat(user1, with(user2));
+
+    // Проверяем, что созданный чат является личным
+    assertThat(chat.isPersonal(), is(true));
+
+    // Проверяем, что созданный чат содержит информацию о личном чате
+    assertThat(chat.getPerosnalChatInfo(), is(notNullValue()));
+
+    // Проверяем, что созданные чаты видны пользователям
+    Chat chatUser1 = chatService.getChat(user1, chat.getId());
+    Chat chatUser2 = chatService.getChat(user2, chat.getId());
+    assertThat(chat, is(equalTo(chatUser1)));
+    assertThat(chat, is(equalTo(chatUser2)));
+
+}
+
+```
+
+Также написанны интеграционные тесты, которые тестируют всю систему целиком:
+
+Пример интеграционного теста:
+
+```java
+
+// Тестирование авторизации пользователя
+@Test
+void registerTest() {
+
+    // Логин и пароль
+    String username = "ExampleUser";
+    String password = "password";
+
+    // Тело запроса
+    UserCredentials credentials = new UserCredentials(username, password);
+
+    // Отправляем запрос POST
+    mvc.perform(post("/api/v1/auth/login")
+                    // Указываем тело запроса
+                    .content(mapper.writeValueAsString(details))
+                    // Указываем тип тела запроса: JSON 
+                    .contentType(MediaType.APPLICATION_JSON))
+            // Проверяем, что статус ответа - 200 OK
+            .andExpect(status().isOk())
+            // Проверяем, что ответ содержит идентификатор пользователя
+            .andExpect(jsonPath("$.userId", is(not(emptyString())))) 
+            // Проверяем, что ответ содержит jwt токен авторизации
+            .andExpect(jsonPath("$.token", is(not(emptyString())))) 
+            // Проверяем, что ответ содержит правильный логин пользователя
+            .andExpect(jsonPath("$.username", is(equalTo(username))));
+}
+
+```
+
+
