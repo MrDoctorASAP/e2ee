@@ -106,6 +106,8 @@ void createPersonalChat() {
     assertThat(chat.getPerosnalChatInfo(), is(notNullValue()));
 
     // Проверяем, что созданные чаты видны пользователям
+    // Метод getChat вернёт чат пользователя по идентификатору,
+    // getChat так же осуществит проверку прав доступа на просмотр чата
     Chat chatUser1 = chatService.getChat(user1, chat.getId());
     Chat chatUser2 = chatService.getChat(user2, chat.getId());
     assertThat(chat, is(equalTo(chatUser1)));
