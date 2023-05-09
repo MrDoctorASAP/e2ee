@@ -4,8 +4,6 @@
 
 Для создания и подписи сертификата используется **openssl** (Улитита Linux)
 
-#### Создание сертификата:
-
 Файл **domains.ext** (Создать перед исполнением команд в папке исполнения)
 
 ```
@@ -16,6 +14,8 @@ subjectAltName = @alt_names
 [alt_names]
 DNS.1 = localhost
 ```
+
+#### Создание сертификата:
 
 ```
 openssl req -x509 -nodes -new -sha256 -days 365 -newkey rsa:2048 \
