@@ -6,6 +6,17 @@
 
 #### Создание сертификата:
 
+Файл **domains.ext** (Создать перед исполнением команд в папке исполнения)
+
+```
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = localhost
+```
+
 ```
 openssl req -x509 -nodes -new -sha256 -days 365 -newkey rsa:2048 \
     -keyout RootCA.key -out RootCA.pem -subj "/C=RU/CN=E2EE"
@@ -23,17 +34,6 @@ openssl req -new -nodes -newkey rsa:2048 -keyout e2ee.key -out e2ee.csr \
 ```
 openssl x509 -req -sha256 -days 365 -in e2ee.csr -CA RootCA.pem -CAkey RootCA.key \
     -CAcreateserial -extfile domains.ext -out e2ee.crt
-```
-
-Файл domains.ext
-
-```
-authorityKeyIdentifier=keyid,issuer
-basicConstraints=CA:FALSE
-keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-subjectAltName = @alt_names
-[alt_names]
-DNS.1 = localhost
 ```
 
 
