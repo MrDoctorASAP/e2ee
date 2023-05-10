@@ -624,7 +624,7 @@ SHA256 алгоритм всегда выдаёт 32 байта на выход�
 Отпечатки будут визуализированны для более удобного сравнения.
 Если они совпадают на обоих устройствах - шифрование надёжно.
 
-![Fingerprint](Fingerprint.png)
+![Fingerprint](screenshots/Fingerprint.png)
 
 8 на 8 ячеек: каждая ячейка это 1 байт, всего 64 байта.
 
@@ -650,8 +650,8 @@ const color = hsl(hue, saturation, lightness)
 
 **Admin**
 
-![Fingerprint](Fingerprint1.png)
+![Fingerprint](screenshots/Fingerprint1.png)
 
 **User 1**
 
-![Fingerprint](Fingerprint2.png)
+![Fingerprint](screenshots/Fingerprint2.png)
