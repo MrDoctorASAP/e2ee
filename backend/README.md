@@ -1,5 +1,89 @@
 
 
+# Features
+
+### Регистрация пользователей
+
+Регистрация пользователя производится HTTP запросом на `/api/v1/auth/register` методом POST с предачей тела `UserRegistration` в формате JSON.
+
+```java
+// Тело запроса регистрации
+public class UserRegistration {
+    // Данные для регистрации
+    private UserCredentials credentials;
+    // Данные профиля пользователя
+    private String firstName;
+    private String lastName;
+    private String email;
+}
+
+// Данные для регистрации/входа
+public class UserCredentials {
+    private String username; // Логин пользователя
+    private String password; // Пароль
+}
+```
+
+Сервер отправляет ответ с телом `AuthenticationToken` в формате JSON
+
+```java
+public class AuthenticationToken {
+    private Long userId; // Идентификатор пользователя
+    private String username; // Логин
+    private String token; // Токен авторизации
+}
+```
+
+Метод контроллера:
+
+```java
+@PostMapping("/api/v1/auth/register")
+public AuthenticationToken register(@Valid @RequestBody UserRegistration user) {
+    // Создание пользователя
+    userService.createUser(user);
+    // Авторизация
+    return authService.authenticate(user.getCredentials());
+}
+```
+
+Авторизация пользователя:
+
+```java
+
+public AuthenticationToken authenticate(String username, String password) {
+    // Авторизация пользователя, через authenticationManager (класс Spring Security)
+    authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(username, password)
+    );
+    // Создание JWT токена авторизации
+    String token = provider.createToken(username);
+    // Загрузка пользователя из базы данных
+    Long userId = userService.loadUserByUsername(username).getId();
+    // Формирование ответа сервера
+    return new AuthenticationToken(userId, username, token);
+}
+
+```
+
+Создание JWT токена авторизации:
+
+```java
+// Создание JWT токена авторизации
+public String createToken(String username) {
+    // Полезные данные - логин пользователя
+    Claims claims = Jwts.claims().setSubject(username);
+    Date now = new Date();
+    Date validity = new Date(now.getTime() + expired);
+    return Jwts.builder()
+            .setClaims(claims) // Полезные данные
+            .setIssuedAt(now) // Дата создания токена
+            .setExpiration(validity) // Срок годности
+            .signWith(SignatureAlgorithm.HS256, secret) // Алгоритм подписи токена
+            .compact();
+}
+```
+
+
 # HTTPS
 
 Для создания и подписи сертификата используется **openssl** (Улитита Linux)
