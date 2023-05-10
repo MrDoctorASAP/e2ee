@@ -1,4 +1,4 @@
-# Implementation note
+# Clinet implementation note
 
 * [Авторизация](#авторизация)
 * [Личные и груповые чаты](#личные-и-груповые-чаты)
