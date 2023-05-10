@@ -221,7 +221,7 @@ void registerTest() {
     // Отправляем запрос POST
     mvc.perform(post("/api/v1/auth/login")
                     // Указываем тело запроса
-                    .content(mapper.writeValueAsString(details))
+                    .content(mapper.writeValueAsString(credentials))
                     // Указываем тип тела запроса: JSON 
                     .contentType(MediaType.APPLICATION_JSON))
             // Проверяем, что статус ответа - 200 OK
