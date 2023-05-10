@@ -83,6 +83,64 @@ public String createToken(String username) {
 }
 ```
 
+# Web socket
+
+Конфигурация:
+
+```java
+
+// Конфигурация веб сокета
+public class SocketSecurityConfig extends AbstractSecurityWebSocketMessageBrokerConfigurer {
+
+    // Базовая конфигурация вэб сокета
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        // Устанавливаем модель обмена сообщениями с клиетом
+        // topic - обмен сообщениями по модели "издатель-подписчик"
+        registry.enableSimpleBroker("/topic");
+    }
+    
+    // Регистрация точек доступа к веб сокету
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // Добавляем точку доступа к вебсокету по пути /ws
+        registry.addEndpoint("/ws")
+                // Разрешённый origin для доступа к веб сокету 
+                .setAllowedOrigins("https://localhost:3000")
+                // Указание, что клиент будет работать с веб сокетом, через SockJS
+                .withSockJS();
+    }
+
+    // Разрешить доступ к веб сокету клиентскому серверу
+    protected boolean sameOriginDisabled() {
+        return true;
+    }
+
+}
+
+```
+
+Работа с веб сокетом осуществялется, через класс `SimpMessagingTemplate` - это специальный класс библиотеки `spring-websocket`, который предоставляет методы для работы с веб сокетом.
+
+Рассмотрим пример отправки сообщения через веб сокет:
+
+```java
+
+// Сервис для работы с веб сокетом
+public class MessagingService {
+
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+    // Публикация события отпарвки сообщения
+    public void publish(MessageEvent event) {
+        // Отправляем обьект события "event" через веб сокет
+        // Обьект будет преобразован в JSON формат 
+        // и оправлен по протоколу STOMP
+        // Это событие получат клиенты подписанные на "/topic/message"
+        simpMessagingTemplate.convertAndSend("/topic/message", event);
+    }
+
+}
+
+```
 
 # HTTPS
 
