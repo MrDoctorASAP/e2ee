@@ -1,8 +1,14 @@
 
+* [Регистрация пользователей](#регистрация-пользователей)
+* [Аутентификация](#аутентификация)
+* [Web socket](#web-socket)
+* [Обмен ключей](#обмен-ключей)
+* [Отправка сообщений в секретный чат](#отправка-сообщений-в-секретный-чат)
+* [HTTPS](#https)
+* [CORS](#cors)
+* [Тестирование](#тестирование)
 
-# Features
-
-### Регистрация пользователей
+# Регистрация пользователей
 
 Регистрация пользователя производится HTTP запросом на `/api/v1/auth/register` методом POST с предачей тела `UserRegistration` в формате JSON.
 
@@ -81,6 +87,91 @@ public String createToken(String username) {
             .signWith(SignatureAlgorithm.HS256, secret) // Алгоритм подписи токена
             .compact();
 }
+```
+
+# Аутентификация
+
+Для аунтефикации пользоваетя по jwt токену, клиент включает в запрос 
+заголовок Authorization, в котором укзаывает jwt токен
+
+Заголовок имеет вид:
+
+```
+Authorization: Bearer [token]
+```
+
+По этому заголовку сервер сможет идентифицировать пользователя.
+
+Получение токена из запроса:
+
+```java
+
+// Извлечение токена из запроса пользователя
+public String resolveToken(Request request) {
+    // Получение заголовка Authorization из запроса
+    String bearerToken = request.getHeader("Authorization");
+    // Если такой заголовок есть и начинается с ключевого слова Bearer
+    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+        // Обрезаем ключевое слово Bearer
+        return bearerToken.substring(7);
+    }
+    // В противном случае возвращяем null
+    return null;
+}
+
+// Извлечение логина пользователя по токену
+public String getUsernameByToken(String token) {
+    return Jwts.parser()
+        // Установка ключа подписи
+        .setSigningKey(secret)
+        // Парсинг токена и получение логина из тела токена
+        .parseClaimsJws(token)
+        .getBody()
+        .getSubject();
+}
+
+// Создание обьекта аутентификации из токена
+public Authentication getAuthentication(String token) {
+    
+    // Получение логина из токена
+    String username = getUsernameByToken(token);
+    
+    // Загрузка данных пользователя из базы данных
+    UserDetails userDetails = service.loadUserByUsername(username);
+
+    // Создание обьекта аутентификации на основе данных пользователя
+    return new UsernamePasswordAuthenticationToken(userDetails);
+
+}
+
+```
+
+При поступлении запроса от клиента, 
+этот запрос обязан пройти через цепочку фильтров безопастности. 
+
+Один из таких фильров это фильтр `JwtSecurityFilter`, 
+который отвечает за аутентификацию пользователя по jwt токену.
+
+Метод класса отвечающий за аутентификацию пользователя:
+
+```java
+
+// Филтрация зароса пользователя
+public void doFilter(Request request, Response response){
+    
+    // Получаем токен из запроса
+    String token = resolveToken(request);
+    
+    // Если в запросе есть токен
+    if (token != null) {
+        // Создание обьекта аутентификации из токена
+        Authentication authentication = getAuthentication(token);
+        // Устанавливаем обьект аутентификации в контекс запроса
+        // В дальнейшем мы можем получить этот обьект из контекста для авторизации пользоваетя
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+}
+
 ```
 
 # Web socket
@@ -258,91 +349,6 @@ public List<SecureChatMessage> getMessages(User user, List<SecureChatId> chatIds
 public void deleteMessages(User user, List<Long> messageIds) {
     // Удаление сообщений с указанными идентификаторами из базы данных
     messageRepository.deleteAllByIdIn(messageIds);
-}
-
-```
-
-# Аутентификация
-
-Для аунтефикации пользоваетя по jwt токену, клиент включает в запрос 
-заголовок Authorization, в котором укзаывает jwt токен
-
-Заголовок имеет вид:
-
-```
-Authorization: Bearer [token]
-```
-
-По этому заголовку сервер сможет идентифицировать пользователя.
-
-Получение токена из запроса:
-
-```java
-
-// Извлечение токена из запроса пользователя
-public String resolveToken(Request request) {
-    // Получение заголовка Authorization из запроса
-    String bearerToken = request.getHeader("Authorization");
-    // Если такой заголовок есть и начинается с ключевого слова Bearer
-    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-        // Обрезаем ключевое слово Bearer
-        return bearerToken.substring(7);
-    }
-    // В противном случае возвращяем null
-    return null;
-}
-
-// Извлечение логина пользователя по токену
-public String getUsernameByToken(String token) {
-    return Jwts.parser()
-        // Установка ключа подписи
-        .setSigningKey(secret)
-        // Парсинг токена и получение логина из тела токена
-        .parseClaimsJws(token)
-        .getBody()
-        .getSubject();
-}
-
-// Создание обьекта аутентификации из токена
-public Authentication getAuthentication(String token) {
-    
-    // Получение логина из токена
-    String username = getUsernameByToken(token);
-    
-    // Загрузка данных пользователя из базы данных
-    UserDetails userDetails = service.loadUserByUsername(username);
-
-    // Создание обьекта аутентификации на основе данных пользователя
-    return new UsernamePasswordAuthenticationToken(userDetails);
-
-}
-
-```
-
-При поступлении запроса от клиента, 
-этот запрос обязан пройти через цепочку фильтров безопастности. 
-
-Один из таких фильров это фильтр `JwtSecurityFilter`, 
-который отвечает за аутентификацию пользователя по jwt токену.
-
-Метод класса отвечающий за аутентификацию пользователя:
-
-```java
-
-// Филтрация зароса пользователя
-public void doFilter(Request request, Response response){
-    
-    // Получаем токен из запроса
-    String token = resolveToken(request);
-    
-    // Если в запросе есть токен
-    if (token != null) {
-        // Создание обьекта аутентификации из токена
-        Authentication authentication = getAuthentication(token);
-        // Устанавливаем обьект аутентификации в контекс запроса
-        // В дальнейшем мы можем получить этот обьект из контекста для авторизации пользоваетя
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
 }
 
 ```
