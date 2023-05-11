@@ -26,7 +26,7 @@ public class SearchService {
         if (query.startsWith("@")) {
             return searchByUsername(query.substring(1));
         }
-        return null;
+        return searchByName(query);
     }
 
     public List<UserDto> searchByUsername(String query) {
