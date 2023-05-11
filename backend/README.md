@@ -142,6 +142,211 @@ public class MessagingService {
 
 ```
 
+# Обмен ключей
+
+Аннтоация `@Transactional` означает, что все обращения к базе данных в данном методе
+будут выполнены в одной транзакции.
+
+```java
+
+// Сервис реализующий методы обмена ключей
+public class KeyExchangeService {
+
+    // Серсивы
+    private final UserService userService;
+    private final SecureChatIdentityService idService;
+    private final UserProfileService profileService;
+
+    // Репозитории (для работы с базой данных)
+    private final SecureChatMemberRepository memberRepository;
+    private final SecureChatInviteRepository inviteRepository;
+    private final SecureChatAcceptRepository acceptRepository;
+
+    // Сервис для работы с веб сокетом
+    private final MessagingService messagingService;
+
+    // Создание секретного чата
+    @Transactional
+    public SecureChatId createSecureChat(User user, SecureChat secureChat) {
+
+        // Генерируем идетификатор секретного чата
+        SecureChatId secureChatId = idService.generateSecureChatId(user, secureChat);
+        
+        // Сохраняем учатников чата в базу данных
+        memberRepository.saveAll(
+                new SecureChatMember(secureChatId, user.getId()),
+                new SecureChatMember(secureChatId, secureChat.getRecipientId())
+        );
+
+        // Создаём и сохраням приглашение в секретный чат
+        SecureChatInvite invite = inviteRepository.save(new SecureChatInvite(
+                user.getId(),
+                secureChat.getRecipientId(),
+                secureChatId,
+                secureChat.getPublicKey()
+        ));
+
+        // Отправляем приглашение получателю через веб сокет
+        messagingService.publish(invite);
+
+        // Возвращяем идентификатор секретного чата отправителю
+        return secureChatId;
+    }
+
+    // Получение приглашений в сектреный чат для указанного пользователя
+    @Transactional
+    public List<SecureChatInvite> getInvites(User user) {
+        // Получение приглашений из базы данных по идентификатору пользователя
+        return inviteRepository.findAllByRecipientId(user.getId());
+    }
+
+    // Принятие приглашения в сектреный чат
+    @Transactional
+    public void accept(User user, AcceptedSecureChat accept) {
+        
+        // Сохраняем публичный ключ прияного приглашения в базу данных
+        acceptRepository.save(accept.getRecipientKey());
+        
+        // Удаляем приглашение из базы данных
+        inviteRepository.deleteBySecureChatId(accept.getSecureChatId());
+        
+        // Отправляем принятое приглашение через веб сокет
+        messagingService.publish(accept);
+
+    }
+
+    // Получение открытых ключей принятых приглашений для завершения обмена ключей
+    @Transactional
+    public List<RecipientKey> exchange(User user) {
+        // Получение открытых ключей из базы данных по идентификатору пользователя
+        return acceptRepository.findAllByUserId(user.getId());
+    }
+
+    // Завершение обмена ключей
+    @Transactional
+    public void complete(User user, SecureChatId secureChatId) {
+        // Удаление из базы публичного ключа секретного чата по его идентификатору
+        acceptRepository.deleteBySecureChatId(secureChatId);
+    }
+    
+}
+```
+
+# Отправка сообщений в секретный чат
+
+```java
+
+// Отпарвка сообщения в секретный чат
+public void sendMessage(User user, SecureChatMessage message) {
+    
+    // Сохранение зашифрованного сообщения 
+    messageRepository.save(message);
+
+    // Отпавка сообщения через веб сокет
+    messagingService.publish(chatMessage);
+
+}
+
+// Получение всех новых сообщений во всех секретных чатах
+public List<SecureChatMessage> getMessages(User user, List<SecureChatId> chatIds) {
+    // Найти в базе данных все сообщения в секретных чатах по указанному идентификатору пользователя
+    return messageRepository.findAllByRecipientIdAndSecureChatIds(user.getId(), chatIds);
+}
+
+// Удалить сообщения секретных чатов после получения
+@Transactional
+public void deleteMessages(User user, List<Long> messageIds) {
+    // Удаление сообщений с указанными идентификаторами из базы данных
+    messageRepository.deleteAllByIdIn(messageIds);
+}
+
+```
+
+# Аутентификация
+
+Для аунтефикации пользоваетя по jwt токену, клиент включает в запрос 
+заголовок Authorization, в котором укзаывает jwt токен
+
+Заголовок имеет вид:
+
+```
+Authorization: Bearer [token]
+```
+
+По этому заголовку сервер сможет идентифицировать пользователя.
+
+Получение токена из запроса:
+
+```java
+
+// Извлечение токена из запроса пользователя
+public String resolveToken(Request request) {
+    // Получение заголовка Authorization из запроса
+    String bearerToken = request.getHeader("Authorization");
+    // Если такой заголовок есть и начинается с ключевого слова Bearer
+    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+        // Обрезаем ключевое слово Bearer
+        return bearerToken.substring(7);
+    }
+    // В противном случае возвращяем null
+    return null;
+}
+
+// Извлечение логина пользователя по токену
+public String getUsernameByToken(String token) {
+    return Jwts.parser()
+        // Установка ключа подписи
+        .setSigningKey(secret)
+        // Парсинг токена и получение логина из тела токена
+        .parseClaimsJws(token)
+        .getBody()
+        .getSubject();
+}
+
+// Создание обьекта аутентификации из токена
+public Authentication getAuthentication(String token) {
+    
+    // Получение логина из токена
+    String username = getUsernameByToken(token);
+    
+    // Загрузка данных пользователя из базы данных
+    UserDetails userDetails = service.loadUserByUsername(username);
+
+    // Создание обьекта аутентификации на основе данных пользователя
+    return new UsernamePasswordAuthenticationToken(userDetails);
+
+}
+
+```
+
+При поступлении запроса от клиента, 
+этот запрос обязан пройти через цепочку фильтров безопастности. 
+
+Один из таких фильров это фильтр `JwtSecurityFilter`, 
+который отвечает за аутентификацию пользователя по jwt токену.
+
+Метод класса отвечающий за аутентификацию пользователя:
+
+```java
+
+// Филтрация зароса пользователя
+public void doFilter(Request request, Response response){
+    
+    // Получаем токен из запроса
+    String token = resolveToken(request);
+    
+    // Если в запросе есть токен
+    if (token != null) {
+        // Создание обьекта аутентификации из токена
+        Authentication authentication = getAuthentication(token);
+        // Устанавливаем обьект аутентификации в контекс запроса
+        // В дальнейшем мы можем получить этот обьект из контекста для авторизации пользоваетя
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+}
+
+```
+
 # HTTPS
 
 Для создания и подписи сертификата используется **openssl** (Улитита Linux)
