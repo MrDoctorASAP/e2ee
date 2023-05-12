@@ -18,7 +18,7 @@
     * Понятие backend/frontend
 * Реализация клиентской части
     * Выбор технологий разработки клиентской части веб приложения 
-        * Html/Css/JavaScript/TypeScript
+        * Краткое описание Html/Css/JavaScript/TypeScript
         * Используемые библиотеки
             * React Framework
             * Bootstrap и другие билиотеки графических компонетов
