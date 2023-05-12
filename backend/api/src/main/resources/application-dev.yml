@@ -2,9 +2,6 @@ logging:
   file:
     name: "logs.log"
 spring:
-#  autoconfigure:
-#    exclude[0]: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-#    exclude[1]: org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
   datasource:
     url: jdbc:h2:mem:memdb
     username: sa
@@ -12,14 +9,13 @@ spring:
     driverClassName: org.h2.Driver
   jpa:
     spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
-#    show-sql: true
   mvc: 
     dispatch-options-request: true
 
 jwt:
   token:
-    secret: RWFRWFRWFWRFDSEQGTHTEDDWFEWGHTBRWEAD
-    expired: 120000000
+    secret: 456SwfZHmzVwtAMpBqjyY5zVtsKA84pBDhPpQWa2cXsLtRk4eFtskuctVjczQCkD
+    expired: 31536000000
 
 security:
   access-control-allow-origin: "https://localhost:3000"
