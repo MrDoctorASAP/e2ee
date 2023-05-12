@@ -110,8 +110,14 @@ function ChatPage({ auth, setAuth, ...props }) {
 
     const user = await profile(auth.userId)
     setUser(user)
-
+    
     const chats = await getChats(auth)
+
+    if (chats === null) {
+      clear()
+      setAuth(null)
+    }
+
     chatList.registerChats(chats)
 
     const _invites = await invites(auth)
@@ -152,7 +158,13 @@ function ChatPage({ auth, setAuth, ...props }) {
 
   useEffect(() => {
     if (!auth) return
-    onLoad().then(() => setChatsLoading(false))
+    onLoad()
+      .then(() => setChatsLoading(false))
+      .catch(e => {
+        console.log(e)
+        clear()
+        setAuth(null)
+      })
   }, [auth])
 
   const onMessageReceive = (messageEvent) => {
