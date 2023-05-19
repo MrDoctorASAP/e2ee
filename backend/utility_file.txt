@@ -1,0 +1,6 @@
+CREATE USER user_name   
+    [   
+        { FOR | FROM } LOGIN login_name   
+    ]  
+    [ WITH <limited_options_list> [ ,... ] ]   
+[ ; ]  
