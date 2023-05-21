@@ -459,6 +459,7 @@ password: 123456
 
 server:
   ssl:
+    protocol: tls
     key-store: classpath:e2ee.p12
     key-store-password: 123456
     key-store-type: pkcs12
