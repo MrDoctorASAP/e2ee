@@ -465,7 +465,7 @@ server:
     key-store-type: pkcs12
     key-alias: 1
     key-password: 123456
-  port: 3000
+  port: 8080
 
 ```
 
