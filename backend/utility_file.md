@@ -10,6 +10,7 @@ CREATE USER user_name
 ```java
 CREATE USER dbUser
     FOR LOGIN dbUser
-    WITH DEFAULT_SCHEMA = dbo;
+    WITH 
+    PASSWORD 'cWSp4ylsH7DK';
     
 ```
